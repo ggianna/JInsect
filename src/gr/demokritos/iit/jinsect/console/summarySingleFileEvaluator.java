@@ -349,7 +349,7 @@ public class summarySingleFileEvaluator {
     private static void printUsage() {
             System.err.println("Syntax:\nsummaryEvaluator [-summary=summary.txt] [-modelDir=models/]"+
                     "[-nMin=#] [-nMax=#] [-dist=#]" + 
-                    "[-s] [-docClass=...] [-compClass=...]");
+                    "[-s] [-docClass=...] [-compClass=...] [-merge]");
             System.err.println("nMin=#\tMin n-gram size.\nnMax=#\tMax n-gram size.\n" +
                     "dist=#\tN-gram window.\n" +
                     "-s\tFor non-verbose output (silent).\n" +
@@ -357,6 +357,9 @@ public class summarySingleFileEvaluator {
                         "Defaults to jinsect.documentModel.NGramDocument \n" +
                     "-compClass=...\tA java class identifier to use as Comparator class. " +
                         "Defaults to jinsect.documentModel.NGramCachedGraphComparator \n" +
+                    "-merge\tIf indicated then the model files' representation is merged" +
+                    " to provide an overall model graph. Then comparison is performed" +
+                    " with respect to the overall graph." +
                     "-?\tShow this screen.");
     }
     
@@ -374,13 +377,14 @@ public class summarySingleFileEvaluator {
         // Vars
         int NMin, NMax, Dist;
         String DocumentClass, ComparatorClass, SummaryFile, ModelDir;
-        boolean Silent;
+        boolean Silent, Merge;
         
         try {
-            NMin = Integer.valueOf(utils.getSwitch(hSwitches,"nMin", "4"));
-            NMax = Integer.valueOf(utils.getSwitch(hSwitches,"nMax", "4"));
-            Dist = Integer.valueOf(utils.getSwitch(hSwitches,"dist", "4"));
-            DocumentClass = utils.getSwitch(hSwitches,"docClass", NGramDocument.class.getName()); 
+            NMin = Integer.valueOf(utils.getSwitch(hSwitches,"nMin", "3"));
+            NMax = Integer.valueOf(utils.getSwitch(hSwitches,"nMax", "3"));
+            Dist = Integer.valueOf(utils.getSwitch(hSwitches,"dist", "3"));
+            DocumentClass = utils.getSwitch(hSwitches,"docClass",
+                    NGramSymWinDocument.class.getName());
             ComparatorClass = utils.getSwitch(hSwitches,"compClass", 
                     StandardDocumentComparator.class.getName()); 
             // Get summary and model dir
@@ -389,6 +393,7 @@ public class summarySingleFileEvaluator {
                     System.getProperty("file.separator"));
             // Determine if silent
             Silent=utils.getSwitch(hSwitches, "s", "FALSE").equals("TRUE");
+            Merge=utils.getSwitch(hSwitches, "merge", "FALSE").equals("TRUE");
             
             if (!Silent)
                 System.err.println("Using parameters:\n" + hSwitches);
@@ -402,7 +407,17 @@ public class summarySingleFileEvaluator {
         summarySingleFileEvaluator ssfeEval = new summarySingleFileEvaluator(DocumentClass, ComparatorClass, NMin, NMax, Dist);
         DocumentSet dsModels = new DocumentSet(ModelDir, 1.0);
         dsModels.createSets(true);
-        double dRes = ssfeEval.doCompare(SummaryFile, dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET));
+
+        double dRes = Double.NaN;
+        if (!Merge)
+            dRes = ssfeEval.doCompare(SummaryFile,
+                dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET));
+        else
+            dRes = summarySingleFileEvaluator.doGraphCompareToSet(SummaryFile,
+                dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET),
+                DocumentClass,
+                ComparatorClass,
+                NMin, NMax, Dist);
         
         System.out.println(String.format("%10.8f", dRes));
     }

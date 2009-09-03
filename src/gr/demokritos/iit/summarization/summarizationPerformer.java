@@ -50,7 +50,7 @@ public class summarizationPerformer {
     
     public static void printSyntax() {
         System.out.println("Syntax: "  + summarizationPerformer.class.getName() + " [-grammarDir=grammar/] [-inputDir=docs/] [-outputSize=#] " +
-                "[-trainData=file.dat] [-useInputDirData] [-maxSentencesSelected=#] [-chunkScoring] [penalizeGrammarChunks] " +
+                "[-trainData=file.dat] [-useInputDirData] [-maxSentencesSelected=#] [-chunkScoring] [-penalizeGrammarChunks] " +
                 "[-eliminateNonContent] [-useAverageChunkScore] [-noGrammar]\n" +
                 "-grammarDir=grammar/  \tThe directory containing a corpus of texts from the same language, categorized in" +
                 " subdirectories by subject. (Including the dir " +
@@ -69,7 +69,8 @@ public class summarizationPerformer {
                 "-eliminateNonContent \tIf selected, all non-content, grammatical words are eliminated in the output summary." +
                 "-useAverageChunkScore \tIf selected, then the average of the chunks' content score of a sentence is used as the" +
                 "sentence score. Otherwise, the sum of the chunks' content score is considered the sentence score.\n" +
-                "-nogrammar \tIf selected, no grammar is used in the process.");
+                "-nogrammar \tIf selected, no grammar is used in the process.\n" +
+                "-aquaint \tIf documents in DUC/TAC AQUAINT format.");
     }
     
     /** Performs summarization. Call by using the <b>-?</b> switch to get help on the syntax.
@@ -90,6 +91,7 @@ public class summarizationPerformer {
         boolean bEliminateNonContent = false;
         boolean bUseAverageChunkScore = false;
         boolean bNoGrammar = false;
+        boolean bAquaint = false;
         
         try {
             sInputDir = utils.getSwitch(hSwitches, "inputDir", "docs/");
@@ -110,6 +112,8 @@ public class summarizationPerformer {
             bUseAverageChunkScore = Boolean.valueOf(utils.getSwitch(hSwitches, 
                     "useAverageChunkScore", Boolean.FALSE.toString()));
             bNoGrammar = Boolean.valueOf(utils.getSwitch(hSwitches, "noGrammar", 
+                    Boolean.FALSE.toString()));
+            bAquaint = Boolean.valueOf(utils.getSwitch(hSwitches, "aquaint",
                     Boolean.FALSE.toString()));
         }
         catch (Exception e) {
@@ -376,7 +380,8 @@ public class summarizationPerformer {
                 if (Content == null) {
                     // Init content graph
                     Content = curContent;
-                    System.err.print("Initial content graph size: " + Content.getGraphLevel(0).getVerticesCount() + " edges.");
+                    System.err.print("Initial content graph size: " +
+                            Content.getGraphLevel(0).getVerticesCount() + " edges.");
                 }
                 else {
                     Content.mergeGraph(curContent, 0.5 - (0.5 / iCurFileCnt));
@@ -540,8 +545,18 @@ public class summarizationPerformer {
                 System.err.println("Extracting and assigning importance to sentences from " + sCurFile + "...");
                 String sText = utils.loadFileToStringWithNewlines(sCurFile).replaceAll("\n", " ");
                 // Extract TEXT ONLY
-                sText = sText.substring(sText.indexOf(ACQUAINT2DocumentSet.TEXT_TAG) + ACQUAINT2DocumentSet.TEXT_TAG.length() + 1);
-                sText = sText.substring(0, sText.indexOf(ACQUAINT2DocumentSet.TEXT_TAG));
+                if (bAquaint) {
+                    sText = sText.substring(sText.indexOf(ACQUAINT2DocumentSet.TEXT_TAG) + ACQUAINT2DocumentSet.TEXT_TAG.length() + 1);
+                    sText = sText.substring(0, sText.indexOf(ACQUAINT2DocumentSet.TEXT_TAG));
+                }
+                else if (sText.contains("HTML")) {
+                    try {
+                        sText = utils.extractText(sText);
+                    }
+                    catch (Exception e) {
+                        System.err.println("Not an HTML file. Keeping whole.");
+                    }
+                }
                 
                 // For each sentence
                 double dSentenceScore = 0.0;

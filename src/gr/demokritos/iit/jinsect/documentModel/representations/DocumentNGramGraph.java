@@ -261,7 +261,8 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
      *to the current value. 1.0 means the old value is completely replaced by the
      *new. 0.5 means the final value is the average of the old and the new.
     ***/
-    public void createWeightedEdgesConnecting(UniqueVertexGraph gGraph, String sStartNode, List lOtherNodes,
+    public void createWeightedEdgesConnecting(UniqueVertexGraph gGraph,
+            String sStartNode, List lOtherNodes,
             double dStartWeight, double dNewWeight, double dDataImportance) {
         
         // If no neightbours

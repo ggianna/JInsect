@@ -20,6 +20,7 @@ import salvo.jesus.graph.DirectedEdge;
 import salvo.jesus.graph.Edge;
 import salvo.jesus.graph.Vertex;
 import salvo.jesus.graph.VertexImpl;
+import salvo.jesus.graph.WeightedEdge;
 import salvo.jesus.graph.WeightedEdgeImpl;
 import salvo.jesus.graph.WeightedGraphImpl;
 
@@ -108,14 +109,15 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
             // Locate only if both vertices have been found
             if (!bVertexMissed)
                 e = utils.locateDirectedEdgeInGraph(this, vH, vT);
-            if (e == null) {
-                e = utils.locateEdgeInGraph(this, vH, vT);
-                if (e instanceof DirectedEdge) {
-                    if (((DirectedEdge)e).getSink() != vT)
-                        e=null;
-                }
-
-            }
+            // ONLY DIRECTED
+//            if (e == null) {
+//                e = utils.locateEdgeInGraph(this, vH, vT);
+//                if (e instanceof DirectedEdge) {
+//                    if (((DirectedEdge)e).getSink() != vT)
+//                        e=null;
+//                }
+//
+//            }
         }
         else
         {
@@ -141,6 +143,75 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
         
         // Return added edge, or null.
         return e;
+    }
+
+    @Override
+    /** Adds a new edge to the graph, checking for duplicate labels of its vertices.
+     *@param vHead The edge head to add.
+     *@param vTail The edge tail to add.
+     *@param dWeight The weight of the edge.
+     *@return The newly added weighted edge.
+     *@throws Exception If the edge cannot be added.
+     */
+    public synchronized WeightedEdge addEdge(Vertex vHead, Vertex vTail, double dWeight)
+        throws Exception {
+        Vertex vH = null, vT = null;
+        boolean bVertexMissed = false;
+
+        if ((vH = locateVertex(vHead)) == null) {
+            vH = vHead;
+            add(vH);
+            bVertexMissed = true;
+        }
+
+        if ((vT = locateVertex(vTail)) == null) {
+            vT = vTail;
+            add(vT);
+            bVertexMissed = true;
+        }
+
+        Edge e = null;
+        if (eclLocator == null) {
+            // Locate only if both vertices have been found
+            if (!bVertexMissed)
+                e = utils.locateDirectedEdgeInGraph(this, vH, vT);
+            // ONLY DIRECTED VERSION
+//            if (e == null) {
+//                e = utils.locateEdgeInGraph(this, vH, vT);
+//                if (e instanceof DirectedEdge) {
+//                    if (((DirectedEdge)e).getSink() != vT)
+//                        e=null;
+//                }
+//
+//            }
+        }
+        else
+        {
+            // Locate only if both vertices have been found
+            if (!bVertexMissed)
+                e = eclLocator.locateDirectedEdgeInGraph(this, vH, vT);
+            // USE ONLY DIRECTED EDGES
+//            if (e == null) {
+//                e = eclLocator.locateEdgeInGraph(this, vH, vT);
+//                if (e instanceof DirectedEdge) {
+//                    if (((DirectedEdge)e).getSink() != vT)
+//                        e=null;
+//                }
+//
+//            }
+
+        }
+
+        if (e == null) {
+            e = super.addEdge(vHead, vTail, dWeight);
+            if (eclLocator != null)
+                eclLocator.addedEdge(e);
+        }
+        else
+            ((WeightedEdge)e).setWeight(dWeight);
+
+        // Return added edge, or null.
+        return ((WeightedEdge)e);
     }
 
     /** Adds a new edge to the graph, checking for duplicate labels of its vertices.

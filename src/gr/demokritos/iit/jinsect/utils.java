@@ -31,7 +31,14 @@ import javax.swing.JFrame;
 import gr.demokritos.iit.jinsect.algorithms.statistics.CombinationGenerator;
 import gr.demokritos.iit.jinsect.algorithms.nlp.PorterStemmer;
 import gr.demokritos.iit.jinsect.structs.UniqueVertexGraph;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.TreeSet;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML.Tag;
+import javax.swing.text.html.HTMLEditorKit.ParserCallback;
+import javax.swing.text.html.parser.ParserDelegator;
 import salvo.jesus.graph.Edge;
 import salvo.jesus.graph.Vertex;
 import salvo.jesus.graph.VertexImpl;
@@ -1194,18 +1201,50 @@ public final class utils {
         }
         return -1;
     }
+
+    public static String extractText(String sWholeString) throws IOException{
+    final ArrayList<String> list = new ArrayList<String>();
+    StringReader reader = new StringReader(sWholeString);
+    
+    ParserDelegator parserDelegator = new ParserDelegator();
+    ParserCallback parserCallback = new ParserCallback() {
+      @Override
+      public void handleText(final char[] data, final int pos) {
+        list.add(new String(data));
+      }
+      @Override
+      public void handleStartTag(Tag tag, MutableAttributeSet attribute, int pos) { }
+      @Override
+      public void handleEndTag(Tag t, final int pos) {  }
+      @Override
+      public void handleSimpleTag(Tag t, MutableAttributeSet a, final int pos) { }
+      @Override
+      public void handleComment(final char[] data, final int pos) { }
+      @Override
+      public void handleError(final java.lang.String errMsg, final int pos) { }
+    };
+    parserDelegator.parse(reader, parserCallback, true);
+
+    StringBuffer sbRes = new StringBuffer();
+    for (String sLine:list)
+        sbRes.append(sLine+"\n");
+    return sbRes.toString();
+  }
+
 }
 
 /** A default {@link WindowAdapter} class, terminating the application according to EXIT_ON_CLOSE.
  */
 class WindowDefaultAdapter extends WindowAdapter {
+    @Override
     public void windowClosing(WindowEvent e) {
         ((JFrame)e.getComponent()).setVisible(false);
         ((JFrame)e.getComponent()).dispose();
     }
     
+    @Override
     public void windowClosed(WindowEvent e) {
-        if (((JFrame)e.getComponent()).EXIT_ON_CLOSE > 0)
+        if (JFrame.EXIT_ON_CLOSE > 0)
             System.exit(0);
     }
 
