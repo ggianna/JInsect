@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -45,8 +47,14 @@ public class INSECTFileDB<TObjectType extends Serializable> extends INSECTDB
         else
             BaseDir = sBaseDir;
     }
-    
-    private String getFileName(String sObjectName, String sObjectCategory) {
+
+    /** Returns the filename of the corresponding object of a given category.
+     *
+     * @param sObjectName The name of the object.
+     * @param sObjectCategory The category of the object.
+     * @return A string representing the filename of the object in the db.
+     */
+    public String getFileName(String sObjectName, String sObjectCategory) {
         return BaseDir + System.getProperty("file.separator") + Prefix + 
                 String.valueOf((sObjectName).hashCode()) + '.' + sObjectCategory;
     }
@@ -61,6 +69,7 @@ public class INSECTFileDB<TObjectType extends Serializable> extends INSECTDB
             oOut.writeObject(oObj);            
             // Complete the GZIP file
             gzout.finish();
+            fsOut.close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -89,6 +98,12 @@ public class INSECTFileDB<TObjectType extends Serializable> extends INSECTDB
         catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+
+        try {
+            fsIn.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         return (TObjectType)oRes;
     }
