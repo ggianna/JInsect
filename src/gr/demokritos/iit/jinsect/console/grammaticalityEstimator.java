@@ -98,6 +98,46 @@ public class grammaticalityEstimator implements Serializable {
     }
 
 /**
+ * Creates a new instance of grammaticalityEstimator, using a given text
+ * for training.
+ *
+ *
+ * @param FileNames A set of filenames to be used as input training set.
+ * @param iMinChar The minimum character n-gram size to take into account.
+ * @param iMaxChar The maximum character n-gram size to take into account.
+ * @param iCharWindow The neighbourhood window to use for the calculation of
+ * n-gram - token neighbourhood of characters.
+ * @param iMinWord The minimum word n-gram size to take into account.
+ * @param iMaxWord The maximum word n-gram size to take into account.
+ * @param iWordWindow The neighbourhood window to use for the calculation of
+ * n-gram - token neighbourhood of words.
+ */
+    public grammaticalityEstimator(String sText, int iMinChar, int iMaxChar, int iCharWindow,
+            int iMinWord, int iMaxWord, int iWordWindow) {
+        iMinCharNGram = iMinChar;
+        iMaxCharNGram = iMaxChar;
+        iMinWordNGram = iMinWord;
+        iMaxWordNGram = iMaxWord;
+        iWordDist = iWordWindow;
+        iCharDist = iCharWindow;
+
+        DistroDocs = new TreeMap<Integer,DistributionDocument>();
+        DistroWordDocs = new TreeMap<Integer,DistributionWordDocument>();
+        // Save to full text data string
+        FullTextDataString = sText;
+
+        // Init distro docs
+        for (int iCnt=iMinCharNGram; iCnt<=iMaxCharNGram; iCnt++) {
+            DistroDocs.put(iCnt, new DistributionDocument(iCharDist, iCnt));
+        }
+
+        for (int iCnt=iMinWordNGram; iCnt<=iMaxWordNGram; iCnt++) {
+            DistroWordDocs.put(iCnt, new DistributionWordDocument(iWordDist, iCnt));
+        }
+
+    }
+
+/**
      * Creates a new instance of grammaticalityEstimator, using a given set of documents for training.
      * 
      * 
@@ -315,7 +355,25 @@ public class grammaticalityEstimator implements Serializable {
         else
             return 0.0; // Everything is zero
     }
-    
+
+
+    /** Calculates degrees of normality, indicating whether a given string appears in a form
+     * similar to text in the training corpus. The distribution of
+     * normalities for all <i>character</i> n-gram sizes is the result.
+     *@param sStr The string to test.
+     *@return A distribution mapping n-gram sizes to a double normality estimation.
+     */
+    public Distribution<Double> getCharNormalityDistro(String sStr) {
+        Distribution<Double> dDist = new Distribution<Double>();
+        for (int iCnt=iMinCharNGram; iCnt<=iMaxCharNGram; iCnt++) {
+            DistributionDocument dCur =  DistroDocs.get(iCnt);
+            if (dCur != null)
+                dDist.setValue(Double.valueOf(iCnt), dCur.normality(sStr));
+        }
+
+        return dDist;
+    }
+
     /** Calculates a degree of normality, indicating whether a given string appears in a form
      * similar to text in the training corpus. The normality is the mean value of a distribution of
      * normalities for all <i>character</i> n-gram sizes.
@@ -324,13 +382,8 @@ public class grammaticalityEstimator implements Serializable {
      *@see DistributionDocument
      */    
     public double getCharNormality(String sStr) {
-        Distribution dDist = new Distribution();
-        for (int iCnt=iMinCharNGram; iCnt<=iMaxCharNGram; iCnt++) {
-            DistributionDocument dCur =  DistroDocs.get(iCnt);
-            if (dCur != null)
-                dDist.setValue(Double.valueOf(iCnt), dCur.normality(sStr));
-        }
-                
+        Distribution dDist = getCharNormalityDistro(sStr);
+        
         // Check for zero value
         if (dDist.sumOfValues() == 0)
             return 0.0;
@@ -341,6 +394,23 @@ public class grammaticalityEstimator implements Serializable {
             return dDist.average(false); // Multi size distro. Return average.
     }
     
+    /** Calculates degrees of normality, indicating whether a given string appears in a form
+     * similar to text in the training corpus. The distribution of
+     * normalities for all <i>word</i> n-gram sizes is the result.
+     *@param sStr The string to test.
+     *@return A distribution mapping n-gram sizes to a double normality estimation.
+     */
+    public Distribution<Double> getWordNormalityDistro(String sStr) {
+        Distribution<Double> dDist = new Distribution<Double>();
+        for (int iCnt=iMinWordNGram; iCnt<=iMaxWordNGram; iCnt++) {
+            DistributionWordDocument dCur =  DistroWordDocs.get(iCnt);
+            if (dCur != null)
+                dDist.setValue(Double.valueOf(iCnt), dCur.normality(sStr));
+        }
+
+        return dDist;
+    }
+    
     /** Calculates a degree of normality, indicating whether a given string appears in a form
      * similar to text in the training corpus. The normality is the mean value of a distribution of
      * normalities for all <i>word</i> n-gram sizes.
@@ -349,12 +419,7 @@ public class grammaticalityEstimator implements Serializable {
      *@see DistributionDocument
      */    
     public double getWordNormality(String sStr) {
-        Distribution dDist = new Distribution();
-        for (int iCnt=iMinWordNGram; iCnt<=iMaxWordNGram; iCnt++) {
-            DistributionWordDocument dCur =  DistroWordDocs.get(iCnt);
-            if (dCur != null)
-                dDist.setValue(Double.valueOf(iCnt), dCur.normality(sStr));
-        }
+        Distribution dDist = getWordNormalityDistro(sStr);
          
         // Check for zero value
         if (dDist.sumOfValues() == 0)

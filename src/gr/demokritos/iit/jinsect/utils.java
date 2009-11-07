@@ -1158,6 +1158,15 @@ public final class utils {
         return dRes;
     }
     
+    public static String reverseString(String source) {
+        int i, len = source.length();
+        StringBuffer dest = new StringBuffer(len);
+
+        for (i = (len - 1); i >= 0; i--)
+          dest.append(source.charAt(i));
+        return dest.toString();
+    }
+
     /** Returns a reversed (by means of item index) version of a given list.
      *@param l The list to reverse.
      *@return The reversed list.

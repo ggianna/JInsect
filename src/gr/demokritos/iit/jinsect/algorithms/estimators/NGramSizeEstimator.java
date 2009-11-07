@@ -178,12 +178,12 @@ public class NGramSizeEstimator {
     public IntegerPair getOptimalRange() {
         double dBestEval = Double.NEGATIVE_INFINITY;
         int iBestMin = 0, iBestMax = 0;
-        // System.err.println("MinNGram MaxNGram Performance");
+        System.err.println("MinNGram MaxNGram Performance");
         
         for (int iMinRank=MinRank; iMinRank <= MaxRank; iMinRank++) {
             for (int iMaxRank=iMinRank; iMaxRank <= MaxRank; iMaxRank++) {
                 double dEval = getSignalToNoise(iMinRank, iMaxRank);
-                // System.err.println(String.format("%d %d %10.8f", iMinRank, iMaxRank, dEval));
+                System.err.println(String.format("%d %d %10.8f", iMinRank, iMaxRank, dEval));
                 
                 if (dEval >= dBestEval) {
                     if (dEval == dBestEval)

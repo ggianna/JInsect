@@ -221,6 +221,24 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
         
         return dSum;
     }
+
+    /** Sums over all the values, taking into account the keys as weights.
+     * If keys are not double keys, then only the weights are considered to be
+     * equal to 1.
+     * @return The sum of all (key*value) pairs.
+     */
+    public double sumWithWeights() {
+        double dSum = 0;
+        // 1st pass - Find sum
+        for (TKeyType dKey : hDistro.keySet()) {
+            if (dKey instanceof Double)
+                dSum += ((Double)dKey * getValue(dKey));
+            else
+                dSum += getValue(dKey);
+        }
+
+        return dSum;
+    }
     
     /** Creates a new probability distribution, corresponding to the occurences
      * of the features appearing in this distribution. If all appearences are equal to zero,
@@ -374,6 +392,8 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
     public TKeyType getValueAtPoint(boolean bOnlyValue, double dPopulPoint) {
         // Get the 95 percent threshold otherwise
         TKeyType dRes = null;
+        if (dPopulPoint == 0)
+            return asTreeMap().firstKey();
         
         double dNumOfObsvs = observationCount(bOnlyValue);
         double dCnt = 0;

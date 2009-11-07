@@ -8,7 +8,6 @@
 
 package gr.demokritos.iit.jinsect.casc.console;
 
-import java.io.BufferedWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,25 +26,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import gr.demokritos.iit.jinsect.structs.CategorizedFileEntry;
 import gr.demokritos.iit.jinsect.structs.DocumentSet;
 import gr.demokritos.iit.jinsect.structs.GraphSimilarity;
-import gr.demokritos.iit.jinsect.algorithms.statistics.KLDivergenceCalculator;
 import gr.demokritos.iit.jinsect.documentModel.documentTypes.NGramDocument;
 import gr.demokritos.iit.jinsect.documentModel.documentTypes.SimpleTextDocument;
 import gr.demokritos.iit.jinsect.documentModel.comparators.StandardDocumentComparator;
@@ -528,7 +520,7 @@ public class casc {
         
         // Create document set
         DocumentSet dsSrc = new DocumentSet(sInputDir,1.0);
-        dsSrc.createSets();
+        dsSrc.createSets(true);
         
         // Init distribution of distances
         final Distribution dDist = new Distribution();
