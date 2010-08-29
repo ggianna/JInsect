@@ -745,7 +745,7 @@ public class summarizationPerformer {
         
         // Output summary
         System.out.println(String.format("SUMMARY using %d sentences:", alSummarySentences.size()));
-        System.out.println(utils.printIterable(alSummarySentences, " "));
+        System.out.println(utils.printIterable(alSummarySentences, ". "));
     }
     
 }

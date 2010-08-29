@@ -283,7 +283,15 @@ public class SemanticIndex implements Notifier {
         }
         WordDefinition wd1 = si.getMeaning(s1);
         WordDefinition wd2 = si.getMeaning(s2);
-        
+
+        if (wd1 == null) {
+            System.err.println("No definition found for:" + s1);
+            return;
+        }
+        if (wd2 == null) {
+            System.err.println("No definition found for:" + s2);
+            return;
+        }
         System.out.println("Result of comparison between '" + s1 + "' and '" + s2 + "':" + 
                 SemanticIndex.compareWordDefinitions(wd1, wd2));
         System.out.println(SemanticIndex.meaningToString(si.getMeaning(s3)));

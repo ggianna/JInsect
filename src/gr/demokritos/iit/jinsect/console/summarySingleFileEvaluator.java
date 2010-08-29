@@ -11,7 +11,6 @@ import gr.demokritos.iit.conceptualIndex.structs.Distribution;
 import gr.demokritos.iit.jinsect.documentModel.ILoadableTextPrint;
 import gr.demokritos.iit.jinsect.documentModel.comparators.NGramCachedGraphComparator;
 import gr.demokritos.iit.jinsect.documentModel.comparators.StandardDocumentComparator;
-import gr.demokritos.iit.jinsect.documentModel.documentTypes.NGramDocument;
 import gr.demokritos.iit.jinsect.documentModel.documentTypes.NGramSymWinDocument;
 import gr.demokritos.iit.jinsect.documentModel.representations.DocumentNGramGraph;
 import gr.demokritos.iit.jinsect.events.SimilarityComparatorListener;
@@ -19,6 +18,7 @@ import gr.demokritos.iit.jinsect.structs.DocumentSet;
 import gr.demokritos.iit.jinsect.structs.GraphSimilarity;
 import gr.demokritos.iit.jinsect.structs.SimilarityArray;
 import gr.demokritos.iit.jinsect.utils;
+import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.lang.reflect.InvocationTargetException;
@@ -37,7 +37,7 @@ public class summarySingleFileEvaluator {
     String DocumentModelClassName;
     String ComparatorClassName;
     int MinNGramRank, MaxNGramRank, NGramDist;
-    
+    boolean AvoidSelfComparison;
     /** Creates a new instance of summarySingleFileEvaluator, given a single 
      *summary text and a set of model texts.
      *@param sDocumentModelClassName The document model class name.
@@ -110,6 +110,8 @@ public class summarySingleFileEvaluator {
         
         // Read first file        
         ndNDoc1.loadDataStringFromFile(sSummaryTextFile);
+
+        File fSummaryFile = new File(sSummaryTextFile);
         
         // Init Comparator Class        
         SimilarityComparatorListener sdcNComparator = null;
@@ -141,6 +143,14 @@ public class summarySingleFileEvaluator {
         Iterator<String> iOtherIter = ssModelFiles.iterator();
         while (iOtherIter.hasNext()) {
             String sModelFile = iOtherIter.next();
+            // Skip self-comparison if asked
+            if (new File(sModelFile).getName().equals(fSummaryFile.getName()) &&
+                    AvoidSelfComparison)
+            {
+                System.err.print(String.format("Skipping '%s' to '%s' comparison",
+                        sModelFile, fSummaryFile));
+                continue;
+            }
             // Load model data
             // Init document class
             ILoadableTextPrint ndNDoc2 = null;
@@ -377,7 +387,7 @@ public class summarySingleFileEvaluator {
         // Vars
         int NMin, NMax, Dist;
         String DocumentClass, ComparatorClass, SummaryFile, ModelDir;
-        boolean Silent, Merge;
+        boolean Silent, Merge, bAvoidSelfComparison;
         
         try {
             NMin = Integer.valueOf(utils.getSwitch(hSwitches,"nMin", "3"));
@@ -394,6 +404,8 @@ public class summarySingleFileEvaluator {
             // Determine if silent
             Silent=utils.getSwitch(hSwitches, "s", "FALSE").equals("TRUE");
             Merge=utils.getSwitch(hSwitches, "merge", "FALSE").equals("TRUE");
+            bAvoidSelfComparison = utils.getSwitch(hSwitches,
+                    "avoidSelfComparison", "FALSE").equals("TRUE");
             
             if (!Silent)
                 System.err.println("Using parameters:\n" + hSwitches);
@@ -405,19 +417,17 @@ public class summarySingleFileEvaluator {
             return;
         }
         summarySingleFileEvaluator ssfeEval = new summarySingleFileEvaluator(DocumentClass, ComparatorClass, NMin, NMax, Dist);
+        ssfeEval.AvoidSelfComparison = bAvoidSelfComparison;
         DocumentSet dsModels = new DocumentSet(ModelDir, 1.0);
         dsModels.createSets(true);
 
         double dRes = Double.NaN;
+        Set<String> ssModels = dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET);
         if (!Merge)
-            dRes = ssfeEval.doCompare(SummaryFile,
-                dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET));
+            dRes = ssfeEval.doCompare(SummaryFile, ssModels);
         else
             dRes = summarySingleFileEvaluator.doGraphCompareToSet(SummaryFile,
-                dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET),
-                DocumentClass,
-                ComparatorClass,
-                NMin, NMax, Dist);
+                ssModels, DocumentClass, ComparatorClass, NMin, NMax, Dist);
         
         System.out.println(String.format("%10.8f", dRes));
     }

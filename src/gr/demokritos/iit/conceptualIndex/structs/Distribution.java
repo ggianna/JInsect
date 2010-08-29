@@ -329,15 +329,20 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
         double dRes = 0.0;
         // Calc average
         Iterator iKeyIter = hDistro.keySet().iterator();
+        double dObservationCount = 0;
         while (iKeyIter.hasNext()) {
             Object oNextKey = iKeyIter.next();
-            if (bOnlyValue) // If only values are of interest
+            if (bOnlyValue)  {// If only values are of interest
                 dRes += Math.pow((Double)hDistro.get(oNextKey) - dExpectation, 2); // Value variance only
-            else
+                dObservationCount++;
+            }
+            else {
                 dRes += (Double)hDistro.get(oNextKey) * Math.pow((Double)oNextKey - dExpectation, 2); // Determine actual expectation
+                dObservationCount += (Double)hDistro.get(oNextKey);
+            }
         }
-        
-        return (dRes / hDistro.keySet().size());
+
+        return (dRes / dObservationCount);
     }
 
     

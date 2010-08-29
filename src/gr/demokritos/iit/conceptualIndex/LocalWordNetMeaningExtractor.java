@@ -76,7 +76,7 @@ public class LocalWordNetMeaningExtractor implements IMeaningExtractor {
             String str;
             while ((str = br.readLine()) != null) {
                 // Only add definition lines
-                if (str.matches("\\d+[.]\\s+[(]\\d+[)].+")) {
+                if (str.matches("\\d+[.]\\s+([(]\\d+[)])*.+")) {
                     // Add definition line, removing idices and so forth
                     //sDefinition += str.replaceAll("\\d+[.]\\s+[(]\\d+[)]", "");
                     sDefinition = str.replaceAll("\\d+[.]\\s+[(]\\d+[)]", "");

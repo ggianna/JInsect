@@ -128,6 +128,7 @@ public class SimilarityBasedIndex implements Serializable,
             Comparator = new SimilarityComparatorListener() {
                 public ProgressEvent event = peCreation;
                 
+            @Override
                 public synchronized ISimilarity getSimilarityBetween(Object oFirst, 
                         Object oSecond) throws InvalidClassException {
                     NamedDocumentNGramGraph pCurDocArg = 
@@ -155,6 +156,7 @@ public class SimilarityBasedIndex implements Serializable,
     /** Creates the index, by creating the clusters, and the corresponding 
      * representing graphs for each cluster.
      */
+    @Override
     public void createIndex() {
         
         // Init clusterer
@@ -262,6 +264,7 @@ public class SimilarityBasedIndex implements Serializable,
      *@return A {@link Set} of strings, corresponding to the document IDs in the
      *cluster that has the most similar content to the given document.
      */
+    @Override
     public Set<String> locateSimilarDocuments(DocumentNGramGraph dngCur) {
         String sClusterLabel = null;
         // Init similarity to low value
@@ -605,6 +608,7 @@ public class SimilarityBasedIndex implements Serializable,
                     "statedata/"));
             gi.Notifier = new NotificationListener() {
                 int iCnt = 0;
+                @Override
                 public synchronized void Notify(Object oSender, 
                         Object oParams) {
                     ProgressEvent pe = (ProgressEvent)oParams;

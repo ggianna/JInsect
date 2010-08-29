@@ -1150,6 +1150,12 @@ public final class utils {
      *@return The factorial.
      */
     public static final double factorial(int m, int n) {
+        if ((m < 0) || (n < 0))
+            return Double.NaN;
+
+        if (n == 0)
+            return 1.0;
+        
         double dRes = 1.0;
         for (int iCnt = m; iCnt <= n; iCnt++) {
             dRes *= iCnt;

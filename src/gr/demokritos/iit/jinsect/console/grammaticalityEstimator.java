@@ -102,7 +102,7 @@ public class grammaticalityEstimator implements Serializable {
  * for training.
  *
  *
- * @param FileNames A set of filenames to be used as input training set.
+ * @param sText The full text for training.
  * @param iMinChar The minimum character n-gram size to take into account.
  * @param iMaxChar The maximum character n-gram size to take into account.
  * @param iCharWindow The neighbourhood window to use for the calculation of
@@ -304,6 +304,46 @@ public class grammaticalityEstimator implements Serializable {
         }
     }
        
+    /** Performs the training of the distribution model.
+     * @param bResetExisting If true, then existing data is cleared, before
+     * training. If false, update is performed.
+     */
+    public void train(String sUpdateText, boolean bResetExisting) {
+        // Reset if needed
+        if (!bResetExisting)
+            FullTextDataString = FullTextDataString + sUpdateText;
+        else
+            FullTextDataString = sUpdateText;
+        
+        // Train distro docs
+
+        // For every distro document
+        for (int iCnt=iMinCharNGram; iCnt<=iMaxCharNGram; iCnt++) {
+            DistributionDocument dCur =  DistroDocs.get(iCnt);
+            // Actually train
+            if (dCur != null)
+                if (!bResetExisting)
+                    dCur.setDataString(sUpdateText, iCnt, bResetExisting);
+                else
+                    dCur.setDataString(FullTextDataString, iCnt, bResetExisting);
+
+        }
+
+        // For every distro document
+        for (int iCnt=iMinWordNGram; iCnt<=iMaxWordNGram; iCnt++) {
+            // Same for word distros
+            DistributionWordDocument dWordCur =  DistroWordDocs.get(iCnt);
+            // Actually train
+            if (dWordCur != null)
+                if (!bResetExisting)
+                    dWordCur.setDataString(sUpdateText, iCnt, 
+                            bResetExisting);
+                else
+                    dWordCur.setDataString(FullTextDataString, iCnt,
+                            bResetExisting);
+        }
+    }
+
     /** Performs the training of the distribution model.
      */
     public void train() {

@@ -7,7 +7,6 @@
 
 package gr.demokritos.iit.jinsect.console;
 
-import com.sun.org.apache.bcel.internal.generic.IINC;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InvalidClassException;

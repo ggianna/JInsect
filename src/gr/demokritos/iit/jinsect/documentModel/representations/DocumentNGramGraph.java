@@ -318,7 +318,8 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
             
             // Get old weight
             WeightedEdge weEdge = null;
-            boolean bFound = (weEdge = (WeightedEdge)ecl.locateEdgeInGraph(gGraph, vA, vB))
+            // Look for SAME ORIENTATION OF EDGE
+            boolean bFound = (weEdge = (WeightedEdge)ecl.locateDirectedEdgeInGraph(gGraph, vA, vB))
                     != null;
             if (bFound)
             {
