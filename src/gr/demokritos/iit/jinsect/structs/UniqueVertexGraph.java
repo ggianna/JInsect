@@ -29,6 +29,9 @@ import salvo.jesus.graph.WeightedGraphImpl;
  * @author PCKid
  */
 public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable {
+    //TODO: REMOVE
+    private static final long serialVersionUID = 880380742772630619L;
+    /////////////
     /** The map of vertices and labels.
      */
     public HashMap<String,Vertex> UniqueVertices;
