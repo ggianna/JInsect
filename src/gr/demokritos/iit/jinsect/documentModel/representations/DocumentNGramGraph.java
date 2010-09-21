@@ -285,7 +285,7 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
         // Otherwise for every neighbour add edge
         java.util.Iterator iIter = lOtherNodes.iterator();
         // Locate or create source node
-        Vertex vA = utils.locateVertexInGraph(gGraph, sStartNode);
+        Vertex vA = gGraph.locateVertex(sStartNode);
         if (vA == null) {
             vA = new VertexImpl();
             vA.setLabel(sStartNode);
@@ -480,17 +480,17 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
 
             // For every edge on other graph
             java.util.Iterator iIter = gOtherGraph.getEdgeSet().iterator();
+            ArrayList<String> lOtherNodes = new ArrayList<String>();
             while (iIter.hasNext())
             {
                 WeightedEdge weCurItem = (WeightedEdge)iIter.next();
-                final String sHead = weCurItem.getVertexA().getLabel();
-                final String sTail = weCurItem.getVertexB().getLabel();
-                final double dWeight = weCurItem.getWeight();
-                final String[] lOtherNodes = new String[1];
-                lOtherNodes[0] = sTail;
+                String sHead = weCurItem.getVertexA().getLabel();
+                String sTail = weCurItem.getVertexB().getLabel();
+                double dWeight = weCurItem.getWeight();
+                lOtherNodes.clear();
+                lOtherNodes.add(sTail);
                 createWeightedEdgesConnecting(gGraph, sHead,
-                 java.util.Arrays.asList(lOtherNodes), 1.0, dWeight,
-                 fWeightPercent);
+                 lOtherNodes, 1.0, dWeight, fWeightPercent);
             }
 
             // DONE: Remove multi-threading

@@ -1246,6 +1246,57 @@ public final class utils {
     return sbRes.toString();
   }
 
+    /**
+     * Returns a string based on a constant change between
+     * vowels and consonants and blanks. Considered "normal".
+     * @return The random "normal" string.
+     */
+    public static String getNormalString() {
+            // Both the set of vowels and consonants also include
+            // black characters to allow for space in the string.
+            String sVowels = "aeiuoy ";
+            String sConsonants = "qwrtpsdf jklhzxcvbnm ";
+            StringBuffer sbRes = new StringBuffer();
+            int iLen = (int)(7.0 +
+                            (3.0 * new Random().nextGaussian()));
+
+            // Randomly initialize to vowel or consonant
+            boolean bVowel = new Random().nextBoolean();
+            for (int iCharCnt=0; iCharCnt<iLen; iCharCnt++) {
+                    int iStart;
+                    if (bVowel) {
+                            iStart = Math.abs(new Random().nextInt()) % (sVowels.length() - 1);
+                            sbRes.append(sVowels.substring(iStart, iStart + 1));
+                    }
+                    else {
+                            iStart = Math.abs(new Random().nextInt()) % (sConsonants.length() - 1);
+                            sbRes.append(sConsonants.substring(iStart, iStart + 1));
+                    }
+                    bVowel = !bVowel;
+            }
+            return sbRes.toString();
+    }
+
+    /**
+     * Returns a random string, based on random selection from
+     * an alphabet of characters and symbols.
+     * @return The random string.
+     */
+    public static String getAbnormalString() {
+            String sAlphabet = "aeiuoy qwrtpsdfjklhzxcvbnm1234567890!@#";
+            StringBuffer sbRes = new StringBuffer();
+            int iLen = (int)(12.0 +
+                            (11.0 * new Random().nextGaussian()));
+
+            // Randomly generate from alphabet
+            for (int iCharCnt=0; iCharCnt<iLen; iCharCnt++) {
+                    int iStart;
+                    iStart = Math.abs(new Random().nextInt()) % (sAlphabet.length() - 1);
+                    sbRes.append(sAlphabet.substring(iStart, iStart + 1));
+            }
+            return sbRes.toString();
+    }
+
 }
 
 /** A default {@link WindowAdapter} class, terminating the application according to EXIT_ON_CLOSE.
