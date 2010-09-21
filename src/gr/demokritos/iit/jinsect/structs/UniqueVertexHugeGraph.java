@@ -5,6 +5,7 @@
 
 package gr.demokritos.iit.jinsect.structs;
 
+import gr.demokritos.iit.conceptualIndex.structs.Distribution;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +46,11 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
         UniqueVertices= new HashMap<String, Vertex>(1000000);
     }
 
+    public final int getHash(String s) {
+        int iRes = Math.abs(s.hashCode()) % UnderlyingGraphs.length;
+        return iRes;
+    }
+
     @Override
     public synchronized void add(Vertex v) throws Exception {
         // Add to self vertices, if not here already
@@ -76,23 +82,20 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     @Override
     public synchronized Edge addEdge(Vertex vHead, Vertex vTail) throws Exception {
         String sHashKey = vHead.getLabel() + VERTEX_LABEL_SEP + vTail.getLabel();
-        int iTarget = sHashKey.hashCode() % UnderlyingGraphs.length;
-        return UnderlyingGraphs[iTarget].addEdge(vHead, vTail);
+        return UnderlyingGraphs[getHash(sHashKey)].addEdge(vHead, vTail);
     }
 
     @Override
     public synchronized WeightedEdge addEdge(Vertex vHead, Vertex vTail, double dWeight) throws Exception {
         String sHashKey = vHead.getLabel() + VERTEX_LABEL_SEP + vTail.getLabel();
-        int iTarget = Math.abs(sHashKey.hashCode() % UnderlyingGraphs.length);
-        return UnderlyingGraphs[iTarget].addEdge(vHead, vTail, dWeight);
+        return UnderlyingGraphs[getHash(sHashKey)].addEdge(vHead, vTail, dWeight);
     }
 
     @Override
     public synchronized void addEdge(Edge edge) throws Exception {
         String sHashKey = edge.getVertexA().getLabel() + VERTEX_LABEL_SEP +
                 edge.getVertexB().getLabel();
-        int iTarget = sHashKey.hashCode() % UnderlyingGraphs.length;
-        UnderlyingGraphs[iTarget].addEdge(edge);
+        UnderlyingGraphs[getHash(sHashKey)].addEdge(edge);
     }
 
     @Override
@@ -111,8 +114,7 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     public boolean containsEdge(Edge edge) {
         String sHashKey = edge.getVertexA().getLabel() + VERTEX_LABEL_SEP +
             edge.getVertexB().getLabel();
-        int iTarget = sHashKey.hashCode() % UnderlyingGraphs.length;
-        return UnderlyingGraphs[iTarget].containsEdge(edge);
+        return UnderlyingGraphs[getHash(sHashKey)].containsEdge(edge);
 
     }
 
@@ -167,6 +169,14 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
         return iEdgeCount;
     }
 
+    public Distribution<Double> getEdgeCountDistro() {
+        Distribution<Double> dRes = new Distribution();
+        for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
+            dRes.setValue((double)iCnt, UnderlyingGraphs[iCnt].getEdgesCount());
+        }
+
+        return dRes;
+    }
     @Override
     public Set getVertexSet() {
         HashSet<Vertex> hRes = new HashSet<Vertex>(UniqueVertices.values());
@@ -189,13 +199,7 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public synchronized Vertex locateVertex(String sVertexLabel) {
-        Vertex vRes = null;
-        for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
-            vRes = UnderlyingGraphs[iCnt].locateVertex(sVertexLabel);
-            if (vRes != null)
-                return vRes;
-        }
-        return vRes;
+        return UniqueVertices.get(sVertexLabel);
     }
 
     @Override
@@ -208,7 +212,7 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
         for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
             UnderlyingGraphs[iCnt].remove(v);
         }
-        
+        super.remove(v);
     }
 
     @Override
@@ -273,22 +277,22 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public List cloneVertices() {
-        return super.cloneVertices();
+        throw new NotImplementedException();
     }
 
     @Override
     public Set getAdjacentVertices(List vertices) {
-        return super.getAdjacentVertices(vertices);
+        throw new NotImplementedException();
     }
 
     @Override
     public GraphTraversal getTraversal() {
-        return super.getTraversal();
+        throw new NotImplementedException();
     }
 
     @Override
     public boolean isConnected(Vertex v1, Vertex v2) {
-        return super.isConnected(v1, v2);
+        throw new NotImplementedException();
     }
 
 
