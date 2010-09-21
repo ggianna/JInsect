@@ -169,17 +169,22 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public Set getVertexSet() {
-        return super.getVertexSet();
+        HashSet<Vertex> hRes = new HashSet<Vertex>(UniqueVertices.values());
+        return Collections.unmodifiableSet(hRes);
     }
 
     @Override
     public int getVerticesCount() {
-        return super.getVerticesCount();
+        int iVerticesCount = 0;
+        for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
+            iVerticesCount += UnderlyingGraphs[iCnt].getVerticesCount();
+        }
+        return iVerticesCount;
     }
 
     @Override
     public Iterator getVerticesIterator() {
-        return super.getVerticesIterator();
+        return UniqueVertices.values().iterator();
     }
 
     @Override
