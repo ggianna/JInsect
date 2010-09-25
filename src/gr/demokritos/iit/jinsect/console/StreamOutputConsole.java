@@ -37,6 +37,7 @@ public class StreamOutputConsole implements IStatusDisplayer {
         OutputProgressPercentage = bOutputProgressPercentage;
     }
 
+    @Override
     public void setStatus(final String sText, final double dValue) {
         StringBuffer sbOut = new StringBuffer(sText);
         if (OutputProgressPercentage)
@@ -47,6 +48,7 @@ public class StreamOutputConsole implements IStatusDisplayer {
             Output.println(sLastText);
     }
 
+    @Override
     public String getStatusText() {
         return sLastText;
     }
@@ -54,10 +56,12 @@ public class StreamOutputConsole implements IStatusDisplayer {
     /** Defines whether progress percentage should be output. 
      *@param bShow If true, output will be directed to the printstream, else it will not.
      */
+    @Override
     public void setVisible(boolean bShow) {
         bVisible = bShow;
     }
 
+    @Override
     public boolean getVisible() {
         return bVisible;
     }

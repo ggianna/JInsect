@@ -16,15 +16,16 @@ import gr.demokritos.iit.jinsect.documentModel.representations.DocumentNGramGrap
 import gr.demokritos.iit.jinsect.events.SimilarityComparatorListener;
 import gr.demokritos.iit.jinsect.structs.DocumentSet;
 import gr.demokritos.iit.jinsect.structs.GraphSimilarity;
-import gr.demokritos.iit.jinsect.structs.SimilarityArray;
 import gr.demokritos.iit.jinsect.utils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +38,7 @@ public class summarySingleFileEvaluator {
     String DocumentModelClassName;
     String ComparatorClassName;
     int MinNGramRank, MaxNGramRank, NGramDist;
-    boolean AvoidSelfComparison;
+    boolean AvoidSelfComparison, Jackknifing, Silent;
     /** Creates a new instance of summarySingleFileEvaluator, given a single 
      *summary text and a set of model texts.
      *@param sDocumentModelClassName The document model class name.
@@ -76,10 +77,6 @@ public class summarySingleFileEvaluator {
      * between the given text and the model texts.
      */
     public double doCompare(String sSummaryTextFile, Set<String> ssModelFiles) {
-        // Init return struct
-        SimilarityArray saRes = new SimilarityArray();
-        Distribution dRes = new Distribution(); // Distro of results
-        
         ILoadableTextPrint ndNDoc1 = null;
         try {
             int iIdx = utils.getConstructor(DocumentModelClassName,3);
@@ -141,21 +138,99 @@ public class summarySingleFileEvaluator {
             return Double.NEGATIVE_INFINITY;
         
         Iterator<String> iOtherIter = ssModelFiles.iterator();
+
+        if (Jackknifing) {
+            Distribution<Double> dJackResults = new Distribution<Double>();
+
+            for (int iLeaveOneOutCnt = 0; iLeaveOneOutCnt < ssModelFiles.size();
+             iLeaveOneOutCnt++) {
+                // Init return struct
+                Distribution dFoldSims = new Distribution(); // Distro of results
+
+                int iCurIdx = 0;
+                iOtherIter = ssModelFiles.iterator();
+                while (iOtherIter.hasNext()) {
+                    String sModelFile = iOtherIter.next();
+                    // Skip self-comparison if asked
+                    if ((new File(sModelFile).getName().equals(fSummaryFile.getName()) &&
+                            AvoidSelfComparison) ||
+                            (iCurIdx++ == iLeaveOneOutCnt))
+                    {
+                        if (!Silent)
+                            System.err.println(String.format("Skipping '%s' to '%s' comparison",
+                                sModelFile, fSummaryFile));
+                        continue;
+                    }
+                    // Load model data
+                    // Init document class
+                    ILoadableTextPrint ndNDoc2 = null;
+
+                    try
+                    {
+                        int iIdx = utils.getConstructor(DocumentModelClassName,3);
+                        if (iIdx > -1)
+                            ndNDoc2 = (ILoadableTextPrint)Class.forName(DocumentModelClassName).getConstructors()
+                                [iIdx].newInstance(MinNGramRank, MaxNGramRank, NGramDist);
+                        else {
+                            iIdx = utils.getConstructor(DocumentModelClassName,5);
+                            ndNDoc2 = (ILoadableTextPrint)Class.forName(DocumentModelClassName).getConstructors()
+                                [iIdx].newInstance(MinNGramRank, MaxNGramRank, NGramDist,
+                                    MinNGramRank, MaxNGramRank);
+                        }
+                    } catch (IllegalArgumentException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (SecurityException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (ClassNotFoundException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (InstantiationException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (IllegalAccessException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (InvocationTargetException ex) {
+                        ex.printStackTrace(System.err);
+                    }
+                    if (ndNDoc2 == null)
+                        return Double.NEGATIVE_INFINITY;
+                    ndNDoc2.loadDataStringFromFile(sModelFile);
+
+                    // Save and Output results
+                    try {
+                        GraphSimilarity sSimil = null;
+                        // Get simple text similarities
+                        sSimil = (GraphSimilarity)sdcNComparator.getSimilarityBetween(ndNDoc1, ndNDoc2);
+                        dFoldSims.increaseValue(sSimil.ValueSimilarity, 1.0);
+                    }
+                    catch (InvalidClassException iceE) {
+                        System.err.println("Cannot compare..." +
+                                iceE.getMessage());
+                    }
+
+                }
+                // Update jackknifing results
+                dJackResults.increaseValue(dFoldSims.average(false), 1.0);
+            }
+            
+            return dJackResults.average(false);
+        }
+
+        Distribution<Double> dRes = new Distribution<Double>();
         while (iOtherIter.hasNext()) {
             String sModelFile = iOtherIter.next();
             // Skip self-comparison if asked
             if (new File(sModelFile).getName().equals(fSummaryFile.getName()) &&
                     AvoidSelfComparison)
             {
-                System.err.print(String.format("Skipping '%s' to '%s' comparison",
+                if (!Silent)
+                    System.err.print(String.format("Skipping '%s' to '%s' comparison",
                         sModelFile, fSummaryFile));
                 continue;
             }
             // Load model data
             // Init document class
             ILoadableTextPrint ndNDoc2 = null;
-                    
-            try 
+
+            try
             {
                 int iIdx = utils.getConstructor(DocumentModelClassName,3);
                 if (iIdx > -1)
@@ -164,7 +239,7 @@ public class summarySingleFileEvaluator {
                 else {
                     iIdx = utils.getConstructor(DocumentModelClassName,5);
                     ndNDoc2 = (ILoadableTextPrint)Class.forName(DocumentModelClassName).getConstructors()
-                        [iIdx].newInstance(MinNGramRank, MaxNGramRank, NGramDist, 
+                        [iIdx].newInstance(MinNGramRank, MaxNGramRank, NGramDist,
                             MinNGramRank, MaxNGramRank);
                 }
             } catch (IllegalArgumentException ex) {
@@ -183,7 +258,7 @@ public class summarySingleFileEvaluator {
             if (ndNDoc2 == null)
                 return Double.NEGATIVE_INFINITY;
             ndNDoc2.loadDataStringFromFile(sModelFile);
-                
+
             // Save and Output results
             try {
                 GraphSimilarity sSimil = null;
@@ -194,9 +269,9 @@ public class summarySingleFileEvaluator {
             catch (InvalidClassException iceE) {
                 System.err.println("Cannot compare...");
             }
-            
+
         }
-        
+
         return dRes.average(false);
     }
     
@@ -210,14 +285,10 @@ public class summarySingleFileEvaluator {
      * @return A double value indicating the <b>normalized value</b> similarity 
      * between the given text representation and the model texts set representation.
      */
-    public static double doGraphCompareToSet(String sSummaryTextFile, 
+    public double doGraphCompareToSet(String sSummaryTextFile, 
             Set<String> ssModelFiles, String sGraphModelClassName, 
             String sComparatorClassName, int iMinNGramRank, int iMaxNGramRank, 
             int iNGramDist) {
-        // Init return struct
-        SimilarityArray saRes = new SimilarityArray();
-        Distribution dRes = new Distribution(); // Distro of results
-        
         DocumentNGramGraph ndNDoc1 = null;
         try {
             int iIdx = utils.getConstructor(sGraphModelClassName,3);
@@ -281,77 +352,175 @@ public class summarySingleFileEvaluator {
         }        
         if (sdcNComparator == null)
             return Double.NEGATIVE_INFINITY;
-        
-        DocumentNGramGraph ndNModel = null;
-        Iterator<String> iOtherIter = ssModelFiles.iterator();
-        int iDocCnt = 0;
-        while (iOtherIter.hasNext()) {
-            String sModelFile = iOtherIter.next();
-            // Load model data
-            // Init document class
-            DocumentNGramGraph ndNDoc2 = null;
-                    
-            try 
-            {
-                int iIdx = utils.getConstructor(sGraphModelClassName,3);
-                if (iIdx > -1)
-                    ndNDoc2 = (DocumentNGramGraph)Class.forName(
-                            sGraphModelClassName).getConstructors()
-                        [iIdx].newInstance(iMinNGramRank, iMaxNGramRank, 
-                        iNGramDist);
-                else {
-                    iIdx = utils.getConstructor(sGraphModelClassName,5);
-                    ndNDoc2 = (DocumentNGramGraph)Class.forName(
-                            sGraphModelClassName).getConstructors()
-                        [iIdx].newInstance(iMinNGramRank, iMaxNGramRank, 
-                        iNGramDist, iMinNGramRank, iMaxNGramRank);
-                }
-            } catch (IllegalArgumentException ex) {
-                ex.printStackTrace(System.err);
-            } catch (SecurityException ex) {
-                ex.printStackTrace(System.err);
-            } catch (ClassNotFoundException ex) {
-                ex.printStackTrace(System.err);
-            } catch (InstantiationException ex) {
-                ex.printStackTrace(System.err);
-            } catch (IllegalAccessException ex) {
-                ex.printStackTrace(System.err);
-            } catch (InvocationTargetException ex) {
-                ex.printStackTrace(System.err);
-            }
-            if (ndNDoc2 == null)
-                return Double.NEGATIVE_INFINITY;
-            
-            try {
-                ndNDoc2.loadDataStringFromFile(sModelFile);
-            } catch (IOException ex) {
-                Logger.getLogger(summarySingleFileEvaluator.class.getName()
-                        ).log(Level.SEVERE, null, ex);
-                return Double.NEGATIVE_INFINITY;
-            } 
-                
-            ++iDocCnt;
-            if (ndNModel == null)
-                ndNModel = ndNDoc2;
-            else
-                ndNModel.merge(ndNDoc2, 1.0 - (iDocCnt / ssModelFiles.size()));
-        }
-        
-        // Save and Output results
-        GraphSimilarity sSimil = null;
-        try {
-            // Get simple text similarities
-            sSimil = (GraphSimilarity)sdcNComparator.getSimilarityBetween(ndNDoc1, 
-                    ndNModel);
-        }
-        catch (InvalidClassException iceE) {
-            System.err.println("Cannot compare...");
-            return Double.NEGATIVE_INFINITY;
-        }
 
-        // Return the normalized value similarity
-        return (sSimil.SizeSimilarity == 0) ? 0 : 
-            (sSimil.ValueSimilarity / sSimil.SizeSimilarity);
+        if (!Jackknifing) {
+            DocumentNGramGraph ndNModel = null;
+            Iterator<String> iOtherIter = ssModelFiles.iterator();
+            int iDocCnt = 0;
+            while (iOtherIter.hasNext())
+            {
+                String sModelFile = iOtherIter.next();
+                // Load model data
+                // Init document class
+                DocumentNGramGraph ndNDoc2 = null;
+
+                try
+                {
+                    int iIdx = utils.getConstructor(sGraphModelClassName,3);
+                    if (iIdx > -1)
+                        ndNDoc2 = (DocumentNGramGraph)Class.forName(
+                                sGraphModelClassName).getConstructors()
+                            [iIdx].newInstance(iMinNGramRank, iMaxNGramRank,
+                            iNGramDist);
+                    else {
+                        iIdx = utils.getConstructor(sGraphModelClassName,5);
+                        ndNDoc2 = (DocumentNGramGraph)Class.forName(
+                                sGraphModelClassName).getConstructors()
+                            [iIdx].newInstance(iMinNGramRank, iMaxNGramRank,
+                            iNGramDist, iMinNGramRank, iMaxNGramRank);
+                    }
+                } catch (IllegalArgumentException ex) {
+                    ex.printStackTrace(System.err);
+                } catch (SecurityException ex) {
+                    ex.printStackTrace(System.err);
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace(System.err);
+                } catch (InstantiationException ex) {
+                    ex.printStackTrace(System.err);
+                } catch (IllegalAccessException ex) {
+                    ex.printStackTrace(System.err);
+                } catch (InvocationTargetException ex) {
+                    ex.printStackTrace(System.err);
+                }
+                if (ndNDoc2 == null)
+                    return Double.NEGATIVE_INFINITY;
+
+                try {
+                    ndNDoc2.loadDataStringFromFile(sModelFile);
+                } catch (IOException ex) {
+                    Logger.getLogger(summarySingleFileEvaluator.class.getName()
+                            ).log(Level.SEVERE, null, ex);
+                    return Double.NEGATIVE_INFINITY;
+                }
+
+                ++iDocCnt;
+                if (ndNModel == null)
+                    ndNModel = ndNDoc2;
+                else
+                    ndNModel.merge(ndNDoc2, 1.0 - (iDocCnt / ssModelFiles.size()));
+            }
+
+            // Save and Output results
+            GraphSimilarity sSimil = null;
+            try {
+                // Get simple text similarities
+                sSimil = (GraphSimilarity)sdcNComparator.getSimilarityBetween(ndNDoc1,
+                        ndNModel);
+            }
+            catch (InvalidClassException iceE) {
+                System.err.println("Cannot compare...");
+                return Double.NEGATIVE_INFINITY;
+            }
+
+            // Return the normalized value similarity
+            return (sSimil.SizeSimilarity == 0) ? 0 :
+                (sSimil.ValueSimilarity / sSimil.SizeSimilarity);
+        }
+        else // if jackknifing
+        {
+            Distribution<Double> dJackknifingResults = new Distribution<Double>();
+            DocumentNGramGraph ndNModel = null;
+            // For each combination
+            for (int iLeaveOutCnt=0; iLeaveOutCnt < ssModelFiles.size();
+                iLeaveOutCnt++)
+            {
+                Distribution<Double> dFoldRes = new Distribution<Double>();
+                Iterator<String> iOtherIter = ssModelFiles.iterator();
+                int iDocCnt = 0;
+                int iCurModelCnt=0;
+
+                // For every model in combination
+                while (iOtherIter.hasNext())
+                {
+                    String sModelFile = iOtherIter.next();
+                    // Omit leave-out model
+                    if (iCurModelCnt++ == iLeaveOutCnt) {
+                        if (!Silent)
+                            System.err.println(String.format("Skipping '%s' to " +
+                              "'%s' comparison", sModelFile, sSummaryTextFile));
+                        continue;
+                    }
+                    
+                    // Load model data
+                    // Init document class
+                    DocumentNGramGraph ndNDoc2 = null;
+
+                    try
+                    {
+                        int iIdx = utils.getConstructor(sGraphModelClassName,3);
+                        if (iIdx > -1)
+                            ndNDoc2 = (DocumentNGramGraph)Class.forName(
+                                    sGraphModelClassName).getConstructors()
+                                [iIdx].newInstance(iMinNGramRank, iMaxNGramRank,
+                                iNGramDist);
+                        else {
+                            iIdx = utils.getConstructor(sGraphModelClassName,5);
+                            ndNDoc2 = (DocumentNGramGraph)Class.forName(
+                                    sGraphModelClassName).getConstructors()
+                                [iIdx].newInstance(iMinNGramRank, iMaxNGramRank,
+                                iNGramDist, iMinNGramRank, iMaxNGramRank);
+                        }
+                    } catch (IllegalArgumentException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (SecurityException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (ClassNotFoundException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (InstantiationException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (IllegalAccessException ex) {
+                        ex.printStackTrace(System.err);
+                    } catch (InvocationTargetException ex) {
+                        ex.printStackTrace(System.err);
+                    }
+                    if (ndNDoc2 == null)
+                        return Double.NEGATIVE_INFINITY;
+
+                    try {
+                        ndNDoc2.loadDataStringFromFile(sModelFile);
+                    } catch (IOException ex) {
+                        Logger.getLogger(summarySingleFileEvaluator.class.getName()
+                                ).log(Level.SEVERE, null, ex);
+                        return Double.NEGATIVE_INFINITY;
+                    }
+
+                    ++iDocCnt;
+                    if (ndNModel == null)
+                        ndNModel = ndNDoc2;
+                    else
+                        ndNModel.merge(ndNDoc2, 1.0 - (iDocCnt / ssModelFiles.size()));
+                }
+                // Compare model to summary
+                // Save and Output results
+                GraphSimilarity sSimil = null;
+                try {
+                    // Get simple text similarities
+                    sSimil = (GraphSimilarity)sdcNComparator.getSimilarityBetween(ndNDoc1,
+                            ndNModel);
+                }
+                catch (InvalidClassException iceE) {
+                    System.err.println("Cannot compare...");
+                    return Double.NEGATIVE_INFINITY;
+                }
+
+                // Return the normalized value similarity
+                double dTmpRes = (sSimil.SizeSimilarity == 0) ? 0.0 :
+                    (sSimil.ValueSimilarity / sSimil.SizeSimilarity);
+                // Add result to fold results
+                dJackknifingResults.increaseValue(dTmpRes, 1.0);
+            }
+            return dJackknifingResults.average(false);
+        }
         
     }
     
@@ -370,6 +539,8 @@ public class summarySingleFileEvaluator {
                     "-merge\tIf indicated then the model files' representation is merged" +
                     " to provide an overall model graph. Then comparison is performed" +
                     " with respect to the overall graph." +
+                    "-jack\tUse jackknifing in comparison (round robin comparison with leave-one-out)" +
+                    "to the model summaries. The resulting score is the mean of the scores." +
                     "-?\tShow this screen.");
     }
     
@@ -386,10 +557,14 @@ public class summarySingleFileEvaluator {
         
         // Vars
         int NMin, NMax, Dist;
-        String DocumentClass, ComparatorClass, SummaryFile, ModelDir;
-        boolean Silent, Merge, bAvoidSelfComparison;
+        String DocumentClass, ComparatorClass, SummaryFile, ModelDir, ModelFiles,
+                PrependPerLine;
+        boolean Silent, Merge, bAvoidSelfComparison, bJack;
         
         try {
+            // Determine if silent
+            Silent=utils.getSwitch(hSwitches, "s", "FALSE").equals("TRUE");
+
             NMin = Integer.valueOf(utils.getSwitch(hSwitches,"nMin", "3"));
             NMax = Integer.valueOf(utils.getSwitch(hSwitches,"nMax", "3"));
             Dist = Integer.valueOf(utils.getSwitch(hSwitches,"dist", "3"));
@@ -401,11 +576,22 @@ public class summarySingleFileEvaluator {
             SummaryFile = utils.getSwitch(hSwitches, "summary", "summary.txt");
             ModelDir = utils.getSwitch(hSwitches, "modelDir", "models" + 
                     System.getProperty("file.separator"));
-            // Determine if silent
-            Silent=utils.getSwitch(hSwitches, "s", "FALSE").equals("TRUE");
+            ModelFiles = utils.getSwitch(hSwitches, "models", "");
+            if (ModelFiles.length() > 0) {
+                if (!Silent)
+                System.err.println("Model files explicitly declared. Ignoring" +
+                        " model dir.");
+            }
             Merge=utils.getSwitch(hSwitches, "merge", "FALSE").equals("TRUE");
             bAvoidSelfComparison = utils.getSwitch(hSwitches,
                     "avoidSelfComparison", "FALSE").equals("TRUE");
+            bJack = utils.getSwitch(hSwitches,
+                    "jack", "FALSE").equals("TRUE");
+            PrependPerLine = utils.getSwitch(hSwitches, "prepend", "");
+
+            if (bJack && bAvoidSelfComparison)
+                System.err.println("WARNING: Both jackknifing and self-comparison " +
+                        "avoidance have been requested.");
             
             if (!Silent)
                 System.err.println("Using parameters:\n" + hSwitches);
@@ -416,20 +602,49 @@ public class summarySingleFileEvaluator {
             printUsage();
             return;
         }
-        summarySingleFileEvaluator ssfeEval = new summarySingleFileEvaluator(DocumentClass, ComparatorClass, NMin, NMax, Dist);
+        summarySingleFileEvaluator ssfeEval = new summarySingleFileEvaluator(
+                DocumentClass, ComparatorClass, NMin, NMax, Dist);
         ssfeEval.AvoidSelfComparison = bAvoidSelfComparison;
-        DocumentSet dsModels = new DocumentSet(ModelDir, 1.0);
-        dsModels.createSets(true);
-
+        ssfeEval.Jackknifing = bJack;
+        ssfeEval.Silent = Silent;
+        
+        Set<String> ssModels;
         double dRes = Double.NaN;
-        Set<String> ssModels = dsModels.toFilenameSet(DocumentSet.FROM_WHOLE_SET);
+
+        // If model dir used
+        if (ModelFiles.length() == 0) {
+            DocumentSet dsModels = new DocumentSet(ModelDir, 1.0);
+            dsModels.createSets(true);
+
+            // Use ordered set. Needed for Jackknifing
+            ssModels = new TreeSet<String>(dsModels.toFilenameSet(
+                DocumentSet.FROM_WHOLE_SET));
+        }
+        else // if explicit files were given
+        {
+            ssModels = new TreeSet<String>(Arrays.asList(ModelFiles.split(";")));
+            Iterator<String> iModels = ssModels.iterator();
+            // Remove empty strings
+            while (iModels.hasNext()) {
+                String sCandModel = iModels.next();
+                if (sCandModel.trim().length() == 0) {
+                    ssModels.remove(sCandModel);
+                    iModels = ssModels.iterator();
+                }
+            }
+        }
+
         if (!Merge)
             dRes = ssfeEval.doCompare(SummaryFile, ssModels);
         else
-            dRes = summarySingleFileEvaluator.doGraphCompareToSet(SummaryFile,
+            dRes = ssfeEval.doGraphCompareToSet(SummaryFile,
                 ssModels, DocumentClass, ComparatorClass, NMin, NMax, Dist);
-        
-        System.out.println(String.format("%10.8f", dRes));
+
+        synchronized (System.out) {
+            System.out.println(String.format("%s\t%10.8f", PrependPerLine +
+                new File(SummaryFile).getName(),
+                dRes));
+        }
     }
     
     

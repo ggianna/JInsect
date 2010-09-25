@@ -342,5 +342,15 @@ public class DocumentSet implements IDocumentSet {
         
         return s;
     }
+
+    public static List<String> categorizedFileEntriesToStrings(List<CategorizedFileEntry>
+            lEntries) {
+        ArrayList<String> lRes = new ArrayList<String>(lEntries.size());
+        for (CategorizedFileEntry cfe : lEntries) {
+            lRes.add(cfe.getFileName());
+        }
+        
+        return lRes;
+    }
 }
 
