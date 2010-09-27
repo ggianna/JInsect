@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import salvo.jesus.graph.Edge;
 import salvo.jesus.graph.GraphFactory;
 import salvo.jesus.graph.GraphListener;
@@ -53,11 +51,10 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public synchronized void add(Vertex v) throws Exception {
-        // Add to self vertices, if not here already
-        if (UniqueVertices.containsKey(v.getLabel()))
-            return;
-        else
-            UniqueVertices.put(v.getLabel(), v);
+        for (int iCnt = 0; iCnt < UnderlyingGraphs.length; iCnt++) {
+            UnderlyingGraphs[iCnt].add(v);
+        }
+        //super.add(v);
         
 //        // Add to graphs asynchronously
 //        for (int iCnt = 0; iCnt < UnderlyingGraphs.length; iCnt++) {
@@ -82,12 +79,20 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     @Override
     public synchronized Edge addEdge(Vertex vHead, Vertex vTail) throws Exception {
         String sHashKey = vHead.getLabel() + VERTEX_LABEL_SEP + vTail.getLabel();
+        if (!contains(vHead))
+            add(vHead);
+        if (!contains(vTail))
+            add(vTail);
         return UnderlyingGraphs[getHash(sHashKey)].addEdge(vHead, vTail);
     }
 
     @Override
     public synchronized WeightedEdge addEdge(Vertex vHead, Vertex vTail, double dWeight) throws Exception {
         String sHashKey = vHead.getLabel() + VERTEX_LABEL_SEP + vTail.getLabel();
+        if (!contains(vHead))
+            add(vHead);
+        if (!contains(vTail))
+            add(vTail);
         return UnderlyingGraphs[getHash(sHashKey)].addEdge(vHead, vTail, dWeight);
     }
 
@@ -95,6 +100,10 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     public synchronized void addEdge(Edge edge) throws Exception {
         String sHashKey = edge.getVertexA().getLabel() + VERTEX_LABEL_SEP +
                 edge.getVertexB().getLabel();
+        if (!contains(edge.getVertexA()))
+            add(edge.getVertexA());
+        if (!contains(edge.getVertexB()))
+            add(edge.getVertexB());
         UnderlyingGraphs[getHash(sHashKey)].addEdge(edge);
     }
 
@@ -107,7 +116,10 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public boolean contains(Vertex v) {
-        return UniqueVertices.containsKey(v.getLabel());
+        for (int iCnt = 0; iCnt < UnderlyingGraphs.length; iCnt++)
+            if (UnderlyingGraphs[iCnt].contains(v))
+                    return true;
+        return false;
     }
 
     @Override
@@ -120,16 +132,42 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public boolean containsVertex(Vertex v) {
-        return UniqueVertices.containsKey(v.getLabel());
+        for (int iCnt = 0; iCnt < UnderlyingGraphs.length; iCnt++)
+            if (UnderlyingGraphs[iCnt].contains(v))
+                    return true;
+        return false;
     }
 
     @Override
     public List getAdjacentVertices(Vertex v) {
+        Iterator  iterator;
+        Edge      edge;
+        Vertex    oppositeVertex;
+
         ArrayList<Vertex> lRes = new ArrayList<Vertex>();
         for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
-            lRes.addAll(UnderlyingGraphs[iCnt].getAdjacentVertices(v));
+            if (UnderlyingGraphs[iCnt].contains(v)) {
+                try {
+                    List<Edge> incidentEdges = UnderlyingGraphs[iCnt].getEdges(v);
+                    if( incidentEdges != null ) {
+                        iterator = incidentEdges.iterator();
+                        while( iterator.hasNext() ) {
+                            edge = (Edge) iterator.next();
+                            oppositeVertex = edge.getOppositeVertex( v );
+                            if( oppositeVertex != null )
+                                lRes.add( oppositeVertex );
+                        }
+                    }
+                }
+                catch (NullPointerException ne) {
+                    // No info for edge in this segment-graph
+                    // Continue
+                }
+            }
         }
-        return lRes;
+
+
+        return Collections.unmodifiableList(lRes);
     }
 
     @Override
@@ -155,7 +193,14 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     public List getEdges(Vertex v) {
         ArrayList<Edge> lRes = new ArrayList<Edge>();
         for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
-            lRes.addAll(UnderlyingGraphs[iCnt].getEdges(v));
+            if (UnderlyingGraphs[iCnt].contains(v))
+                try {
+                    lRes.addAll(UnderlyingGraphs[iCnt].getEdges(v));
+                }
+                catch (NullPointerException ne) {
+                    // This segment-graph contains no edge info on vertex
+                    // Continue
+                }
         }
         return lRes;
     }
@@ -194,12 +239,22 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
 
     @Override
     public Iterator getVerticesIterator() {
-        return UniqueVertices.values().iterator();
+        //return UniqueVertices.values().iterator();
+        HashSet<Vertex> alRes = new HashSet<Vertex>();
+        for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
+            alRes.addAll(UnderlyingGraphs[iCnt].getVertexSet());
+        }
+        return alRes.iterator();
     }
 
     @Override
     public synchronized Vertex locateVertex(String sVertexLabel) {
-        return UniqueVertices.get(sVertexLabel);
+        for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
+            if (UnderlyingGraphs[iCnt].UniqueVertices.containsKey(sVertexLabel))
+                return UnderlyingGraphs[iCnt].locateVertex(sVertexLabel);
+        }
+        return null;
+
     }
 
     @Override

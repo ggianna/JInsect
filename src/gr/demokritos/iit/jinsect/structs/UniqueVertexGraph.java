@@ -87,7 +87,7 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
     public synchronized void add(Vertex v) throws Exception {
         if (UniqueVertices.containsKey(v.getLabel()))
             // If already exists
-            throw new Exception("Item already exists.");
+            return;
         else
             super.add(v);
         // Append
@@ -135,14 +135,15 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
             // Locate only if both vertices have been found
             if (!bVertexMissed)
                 e = eclLocator.locateDirectedEdgeInGraph(this, vH, vT);
-            if (e == null) {
-                e = eclLocator.locateEdgeInGraph(this, vH, vT);
-                if (e instanceof DirectedEdge) {
-                    if (((DirectedEdge)e).getSink() != vT)
-                        e=null;
-                }
-
-            }
+            // ONLY DIRECTED
+//            if (e == null) {
+//                e = eclLocator.locateEdgeInGraph(this, vH, vT);
+//                if (e instanceof DirectedEdge) {
+//                    if (((DirectedEdge)e).getSink() != vT)
+//                        e=null;
+//                }
+//
+//            }
 
         }
         
@@ -166,61 +167,7 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
      */
     public synchronized WeightedEdge addEdge(Vertex vHead, Vertex vTail, double dWeight)
         throws Exception {
-//        Vertex vH = null, vT = null;
-//        boolean bVertexMissed = false;
-//
-//        if ((vH = locateVertex(vHead)) == null) {
-//            vH = vHead;
-//            add(vH);
-//            bVertexMissed = true;
-//        }
-//
-//        if ((vT = locateVertex(vTail)) == null) {
-//            vT = vTail;
-//            add(vT);
-//            bVertexMissed = true;
-//        }
-//
-//        Edge e = null;
-//        if (eclLocator == null) {
-//            // Locate only if both vertices have been found
-//            if (!bVertexMissed)
-//                e = utils.locateDirectedEdgeInGraph(this, vH, vT);
-//            // ONLY DIRECTED VERSION
-////            if (e == null) {
-////                e = utils.locateEdgeInGraph(this, vH, vT);
-////                if (e instanceof DirectedEdge) {
-////                    if (((DirectedEdge)e).getSink() != vT)
-////                        e=null;
-////                }
-////
-////            }
-//        }
-//        else
-//        {
-//            // Locate only if both vertices have been found
-//            if (!bVertexMissed)
-//                e = eclLocator.locateDirectedEdgeInGraph(this, vH, vT);
-//            // USE ONLY DIRECTED EDGES
-////            if (e == null) {
-////                e = eclLocator.locateEdgeInGraph(this, vH, vT);
-////                if (e instanceof DirectedEdge) {
-////                    if (((DirectedEdge)e).getSink() != vT)
-////                        e=null;
-////                }
-////
-////            }
-//
-//        }
-//
-//        if (e == null) {
         WeightedEdge e = super.addEdge(vHead, vTail, dWeight);
-//            if (eclLocator != null)
-//                eclLocator.addedEdge(e);
-//        }
-//        else
-//            ((WeightedEdge)e).setWeight(dWeight);
-
         // Return added edge, or null.
         return ((WeightedEdge)e);
     }

@@ -32,7 +32,6 @@ import gr.demokritos.iit.jinsect.algorithms.statistics.CombinationGenerator;
 import gr.demokritos.iit.jinsect.algorithms.nlp.PorterStemmer;
 import gr.demokritos.iit.jinsect.structs.UniqueVertexGraph;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.TreeSet;
 import javax.swing.text.MutableAttributeSet;

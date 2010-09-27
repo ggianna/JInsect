@@ -282,8 +282,6 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 
             }
         
-        // Otherwise for every neighbour add edge
-        java.util.Iterator iIter = lOtherNodes.iterator();
         // Locate or create source node
         Vertex vA = gGraph.locateVertex(sStartNode);
         if (vA == null) {
@@ -297,15 +295,14 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
             }
         }
 
-        // DEPRECATED
-//        // Get old edges including vA as a vertex
-//        List lOldEdges = gGraph.getEdges(vA);
-        
         EdgeCachedLocator ecl;
         if (eclLocator == null)
             ecl = new EdgeCachedLocator(100);
         else
             ecl = eclLocator;
+        
+        // Otherwise for every neighbour add edge
+        java.util.Iterator iIter = lOtherNodes.iterator();
         // For every edge
         while (iIter.hasNext())
         {
@@ -319,14 +316,16 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
             // Get old weight
             WeightedEdge weEdge = null;
             // Look for SAME ORIENTATION OF EDGE
-            boolean bFound = (weEdge = (WeightedEdge)ecl.locateDirectedEdgeInGraph(gGraph, vA, vB))
+            boolean bFound = (weEdge =
+                    (WeightedEdge)ecl.locateDirectedEdgeInGraph(gGraph, vA, vB))
                     != null;
             if (bFound)
             {
                 dOldWeight = weEdge.getWeight();
                 // Found edge should break to avoid redundancy
                 weCorrectEdge = weEdge;
-                dFinalWeight = dOldWeight + (dNewWeight - dOldWeight) * dDataImportance; // Increase as required
+                dFinalWeight = dOldWeight + (dNewWeight - dOldWeight)
+                        * dDataImportance; // Increase as required
                 weCorrectEdge.setWeight(dFinalWeight);
             }
             else
@@ -339,6 +338,7 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 }
                 catch (Exception e) {
                     // Insert failed. Ignoring...
+                    // TODO: Check if it needs to be removed
                     e.printStackTrace();
                 }
             }

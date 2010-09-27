@@ -79,6 +79,9 @@ public class EdgeCachedLocator implements Serializable {
             if (hOutVertices == null) { // If not found
                 lMisses++;
                 lEdges = getOutgoingEdgesUncached(gGraph, vHead);
+                // TODO: REMOVE
+                lEdges = getOutgoingEdgesUncached(gGraph, vHead);
+                ///////////////
                 // Check if time has reached max value
                 if (TimeCnt == Long.MAX_VALUE) {
                     // if so, cache must be reset
@@ -216,25 +219,18 @@ public class EdgeCachedLocator implements Serializable {
      *@param gGraph The graph to use.
      *@param vHead A vertex with the desired label for the head of the edge.
      *@return A list of outgoing edges from <code>vHead</code>. If no such edges exist returns an
-     *empty list.
+     *empty list. Returns null if the vertex does not exist in the graph.
      */
     protected List getOutgoingEdgesUncached(UniqueVertexGraph gGraph, Vertex vHead) {
-        Vertex vNode = gr.demokritos.iit.jinsect.utils.locateVertexInGraph(gGraph, vHead.toString());
+        Vertex vNode = gGraph.locateVertex(vHead);
+        if (vNode == null)
+            return null;
         ArrayList lRes = new ArrayList();
-        if (vNode != null) {
-            List neighbours = gGraph.getAdjacentVertices(vNode);
-            Iterator iIter = neighbours.iterator();
-            while (iIter.hasNext()) {
-                Vertex vCandidateParent = (Vertex)iIter.next();
-                // Add only child neighbours
-                Edge eCur = gr.demokritos.iit.jinsect.utils.locateDirectedEdgeInGraph(gGraph, vNode, vCandidateParent);
-                if (eCur != null)
-                    lRes.add(eCur);
-            }
-            
-            return lRes;
-        }
         
-        return new ArrayList();
+        for (Edge lCand : (List<Edge>)gGraph.getEdges(vHead)) {
+            if (lCand.getVertexA().equals(vHead))
+                lRes.add(lCand);
+        }
+        return lRes;
     }    
 }
