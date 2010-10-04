@@ -5,7 +5,6 @@
 
 package gr.demokritos.iit.jinsect.documentModel.representations;
 
-import gr.demokritos.iit.jinsect.structs.UniqueVertexGraph;
 import gr.demokritos.iit.jinsect.structs.UniqueVertexHugeGraph;
 import java.util.HashMap;
 
@@ -32,6 +31,5 @@ public class DocumentNGramHGraph extends DocumentNGramGraph {
         DegradedEdges = new HashMap();
 
     }
-
 
 }

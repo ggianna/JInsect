@@ -6,6 +6,10 @@
 package gr.demokritos.iit.jinsect.structs;
 
 import gr.demokritos.iit.conceptualIndex.structs.Distribution;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import salvo.jesus.graph.Edge;
 import salvo.jesus.graph.GraphFactory;
 import salvo.jesus.graph.GraphListener;
@@ -34,7 +40,7 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     public static final char VERTEX_LABEL_SEP = (char)26;
     protected UniqueVertexGraph[] UnderlyingGraphs;
 //    ThreadQueue tRunner = new ThreadQueue();
-    ExecutorService tRunner = Executors.newCachedThreadPool();
+    transient ExecutorService tRunner = Executors.newCachedThreadPool();
 
     public UniqueVertexHugeGraph(int iSegments) {
         UnderlyingGraphs = new UniqueVertexGraph[iSegments];
@@ -349,6 +355,4 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     public boolean isConnected(Vertex v1, Vertex v2) {
         throw new NotImplementedException();
     }
-
-
 }
