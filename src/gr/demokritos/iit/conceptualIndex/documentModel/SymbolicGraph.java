@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import gr.demokritos.iit.jinsect.events.NotificationListener;
 import gr.demokritos.iit.jinsect.structs.UniqueVertexGraph;
+import gr.demokritos.iit.jinsect.structs.UniqueVertexHugeGraph;
 import gr.demokritos.iit.jinsect.utils;
 import salvo.jesus.graph.*;
 
@@ -30,7 +31,7 @@ import salvo.jesus.graph.*;
  *
  * @author ggianna
  */
-public class SymbolicGraph extends UniqueVertexGraph implements gr.demokritos.iit.jinsect.events.Notifier {
+public class SymbolicGraph extends UniqueVertexHugeGraph implements gr.demokritos.iit.jinsect.events.Notifier {
     /** The maximum size (in characters) of the n-grams appearing in this graph.
      */
     int MaxNGramSize;
@@ -52,7 +53,7 @@ public class SymbolicGraph extends UniqueVertexGraph implements gr.demokritos.ii
      *@param iMaxNGramSize The maximum n-gram size within this graph.
      */
     public SymbolicGraph(int iMinNGramSize, int iMaxNGramSize) {
-        super();
+        super(16);
         
         MaxNGramSize = iMaxNGramSize;
         MinNGramSize = iMinNGramSize;
@@ -82,7 +83,7 @@ public class SymbolicGraph extends UniqueVertexGraph implements gr.demokritos.ii
         
         ArrayList l = new ArrayList();
         // Look for direct connection
-        Edge e = gr.demokritos.iit.jinsect.utils.locateDirectedEdgeInGraph(this, vFrom, vTo);
+        Edge e = utils.locateDirectedEdgeInGraph(this, vFrom, vTo);
         if (e != null) {
             // Found it!
             l.add(e);
@@ -92,9 +93,9 @@ public class SymbolicGraph extends UniqueVertexGraph implements gr.demokritos.ii
         // Else look for indirect connection
         
         // Check for actual vertices
-        if ((vFrom = gr.demokritos.iit.jinsect.utils.locateVertexInGraph(this, vFrom)) == null)
+        if ((vFrom = locateVertex(vFrom)) == null)
             return null;
-        if ((vTo = gr.demokritos.iit.jinsect.utils.locateVertexInGraph(this, vTo)) == null)
+        if ((vTo = locateVertex(vTo)) == null)
             return null;
         
         // Check cycle

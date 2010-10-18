@@ -6,10 +6,6 @@
 package gr.demokritos.iit.jinsect.structs;
 
 import gr.demokritos.iit.conceptualIndex.structs.Distribution;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,8 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import salvo.jesus.graph.Edge;
 import salvo.jesus.graph.GraphFactory;
 import salvo.jesus.graph.GraphListener;
@@ -97,8 +91,12 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
         String sHashKey = vHead.getLabel() + VERTEX_LABEL_SEP + vTail.getLabel();
         if (!contains(vHead))
             add(vHead);
+        else
+            vHead = locateVertex(vHead);
         if (!contains(vTail))
             add(vTail);
+        else
+            vTail = locateVertex(vTail);
         return UnderlyingGraphs[getHash(sHashKey)].addEdge(vHead, vTail, dWeight);
     }
 
@@ -108,6 +106,7 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
                 edge.getVertexB().getLabel();
         if (!contains(edge.getVertexA()))
             add(edge.getVertexA());
+
         if (!contains(edge.getVertexB()))
             add(edge.getVertexB());
         UnderlyingGraphs[getHash(sHashKey)].addEdge(edge);
@@ -230,7 +229,8 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     }
     @Override
     public Set getVertexSet() {
-        HashSet<Vertex> hRes = new HashSet<Vertex>(UniqueVertices.values());
+        // Return one of the duplicate verex sets
+        HashSet<Vertex> hRes = new HashSet<Vertex>(UnderlyingGraphs[0].getVertexSet());
         return Collections.unmodifiableSet(hRes);
     }
 
@@ -279,14 +279,16 @@ public class UniqueVertexHugeGraph extends UniqueVertexGraph {
     @Override
     public void removeEdge(Edge edge) throws Exception {
         for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
-            UnderlyingGraphs[iCnt].removeEdge(edge);
+            if (UnderlyingGraphs[iCnt].containsEdge(edge))
+                UnderlyingGraphs[iCnt].removeEdge(edge);
         }
     }
 
     @Override
     public void removeEdges(Vertex v) throws Exception {
         for (int iCnt=0; iCnt < UnderlyingGraphs.length; iCnt++) {
-            UnderlyingGraphs[iCnt].removeEdges(v);
+            if (UnderlyingGraphs[iCnt].contains(v))
+                UnderlyingGraphs[iCnt].removeEdges(v);
         }
         
     }
