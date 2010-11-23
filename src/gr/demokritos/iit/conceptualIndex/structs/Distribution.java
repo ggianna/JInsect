@@ -12,6 +12,7 @@ import gr.demokritos.iit.jinsect.algorithms.statistics.ChiSquareDistributionBase
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /** Represents a ditribution of values, either in terms of a simple histogram, or in terms
@@ -23,7 +24,7 @@ import java.util.TreeMap;
 public class Distribution<TKeyType> implements Serializable, IDistributionComparisonListener {
     /** The underlying {@link TreeMap} representation of the Distribution
      */
-    private TreeMap<TKeyType, Double> hDistro;
+    private NavigableMap<TKeyType, Double> hDistro;
     
     /** Creates a new instance of Distribution */
     public Distribution() {
@@ -34,7 +35,7 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
      *<Object, Double> entries.
      *@param tm The TreeMap.
      */
-    public Distribution(TreeMap<TKeyType, Double> tm){
+    public Distribution(NavigableMap<TKeyType, Double> tm){
         hDistro = tm;
     }
     
@@ -68,6 +69,7 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
     /**Composes a string representation of this distribution, referring only to non-zero elements.
      *@return The string representation of this distribution.
      */
+    @Override
     public String toString() {
         String sRes = "";
         Iterator iIter = hDistro.entrySet().iterator();
@@ -84,7 +86,7 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
     /** Returns the underlying {@link TreeMap} structure.
      *@return The underlying tree map.
      */
-    public TreeMap<TKeyType, Double> asTreeMap() {
+    public NavigableMap<TKeyType, Double> asTreeMap() {
         return hDistro;
     }
     
@@ -247,7 +249,7 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
      */
     public Distribution getProbabilityDistribution() {
         Distribution dNew = new Distribution();
-        dNew.asTreeMap().putAll(this.asTreeMap());
+        dNew.asTreeMap().putAll(hDistro);
         if (dNew.sumOfValues() == 0.0) // Cannot normalize
         {
             Iterator iIter = dNew.asTreeMap().keySet().iterator();

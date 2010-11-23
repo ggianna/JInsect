@@ -30,9 +30,6 @@ import gr.demokritos.iit.jinsect.events.Notifier;
 //import gr.demokritos.iit.jinsect.structs.WordDefinition;
 import gr.demokritos.iit.jinsect.supportUtils.linguistic.ArrayOfDefinition;
 import gr.demokritos.iit.jinsect.supportUtils.linguistic.Definition;
-import gr.demokritos.iit.jinsect.supportUtils.linguistic.DictService;
-import gr.demokritos.iit.jinsect.supportUtils.linguistic.DictServiceSoap;
-import gr.demokritos.iit.jinsect.supportUtils.linguistic.DictService_Impl;
 import gr.demokritos.iit.jinsect.supportUtils.linguistic.WordDefinition;
 
 /** Represents an index of semantic information, connected to a {@link SymbolicGraph}. Each symbol
@@ -86,73 +83,61 @@ public class SemanticIndex implements Notifier {
         if (SemanticLink.containsKey(vNode.toString()))
             return (WordDefinition)(SemanticLink.get(vNode.toString()));
         
-        try {
-            //DictService_Impl dServe = new DictService_Impl();
-            //DictServiceSoap dsServe = dServe.getDictServiceSoap();
-            //WordDefinition wd = dsServe.defineInDict("wn", vNode.toString()); // WordNet
-            if (MeaningExtractor == null)
-            {
-                MeaningExtractor = new InternetWordNetMeaningExtractor(); // Init to default
-            }
-            WordDefinition wd = MeaningExtractor.getMeaning(vNode.toString());
-            
-            boolean bMeaningFound = (wd != null);
-            if (bMeaningFound)
-                bMeaningFound = getDefinitionsSize(wd) > 0;
-            
-            // If no meaning 
-            if (!bMeaningFound) 
-            {
-                wd = null;
-                vNode = gr.demokritos.iit.jinsect.utils.locateVertexInGraph(Graph, vNode.toString());
-                if (vNode != null)
-                    while (wd == null)
-                    {
-                        List neighbours = Graph.getAdjacentVertices(vNode);
-                        List parents = new ArrayList();
-                        
-                        Iterator iIter = neighbours.iterator();
-                        while (iIter.hasNext()) {
-                            Vertex vCandidateParent = (Vertex)iIter.next();
-                            // Add parent neighbours to list
-                            if (gr.demokritos.iit.jinsect.utils.locateDirectedEdgeInGraph(Graph, vCandidateParent, vNode) != null)
-                                parents.add(vCandidateParent);
-                        }
-                        neighbours = parents; // Replace neighbours by parent list
-                        // Inherit definitions into new definition
-                        wd = new WordDefinition();
-                        wd.setWord(vNode.toString());
-                        ArrayOfDefinition aodDefs = new ArrayOfDefinition();
-                        List lDefinitions = new ArrayList();
-                        
-                        boolean bFoundMeaning = false;
-                        iIter = neighbours.iterator(); // Reset iterator
-                        while (iIter.hasNext()) {
-                            WordDefinition wdParent = getMeaning((Vertex)iIter.next());
-                            if (wdParent != null)
-                            {
-                                for (int iCnt = 0; iCnt < wdParent.getDefinitions().getDefinition().length; iCnt++)
-                                    lDefinitions.add(wdParent.getDefinitions().getDefinition()[iCnt]);
-                            }
-                        }
-                        
-                        Definition[] dDef = new Definition[lDefinitions.size()];
-                        lDefinitions.toArray(dDef);
-                        aodDefs.setDefinition(dDef);
-                        wd.setDefinitions(aodDefs);                        
-                    }                
-            }
-                    
-            if (wd != null)
-                SemanticLink.put(vNode.toString(), wd);
-            
-            return wd;
+        //DictService_Impl dServe = new DictService_Impl();
+        //DictServiceSoap dsServe = dServe.getDictServiceSoap();
+        //WordDefinition wd = dsServe.defineInDict("wn", vNode.toString()); // WordNet
+        if (MeaningExtractor == null)
+        {
+            MeaningExtractor = new InternetWordNetMeaningExtractor(); // Init to default
         }
-        catch(javax.xml.rpc.soap.SOAPFaultException sex) {
-       // TODO handle remote exception
-            return null;
+        WordDefinition wd = MeaningExtractor.getMeaning(vNode.toString());
+
+        boolean bMeaningFound = (wd != null);
+        if (bMeaningFound)
+            bMeaningFound = getDefinitionsSize(wd) > 0;
+
+        // If no meaning
+        if (!bMeaningFound)
+        {
+            wd = null;
+            vNode = gr.demokritos.iit.jinsect.utils.locateVertexInGraph(Graph, vNode.toString());
+            if (vNode != null)
+                while (wd == null)
+                {
+                    List neighbours = Graph.getAdjacentVertices(vNode);
+                    List parents = new ArrayList();
+
+                    Iterator iIter = neighbours.iterator();
+                    while (iIter.hasNext()) {
+                        Vertex vCandidateParent = (Vertex)iIter.next();
+                        // Add parent neighbours to list
+                        if (gr.demokritos.iit.jinsect.utils.locateDirectedEdgeInGraph(Graph, vCandidateParent, vNode) != null)
+                            parents.add(vCandidateParent);
+                    }
+                    neighbours = parents; // Replace neighbours by parent list
+                    // Inherit definitions into new definition
+                    wd = new WordDefinition();
+                    wd.setWord(vNode.toString());
+                    ArrayOfDefinition aodDefs = new ArrayOfDefinition();
+                    List lDefinitions = new ArrayList();
+
+                    boolean bFoundMeaning = false;
+                    iIter = neighbours.iterator(); // Reset iterator
+                    while (iIter.hasNext()) {
+                        WordDefinition wdParent = getMeaning((Vertex)iIter.next());
+                        if (wdParent != null)
+                            lDefinitions.addAll(wdParent.getDefinitions().getDefinition());
+                    }
+
+                    aodDefs.getDefinition().addAll(lDefinitions);
+                    wd.setDefinitions(aodDefs);
+                }
         }
-        
+
+        if (wd != null)
+            SemanticLink.put(vNode.toString(), wd);
+
+        return wd;        
     }
     
     /**
@@ -197,8 +182,8 @@ public class SemanticIndex implements Notifier {
                 //    Listener.Notify(this, "Comparing:\n" + d.getWord() + "\nTO\n" + d2.getWord());
                 //////////////
                 if (d.getWordDefinition() == d2.getWordDefinition()) {
-                    dRes += 1.0 / (wd1.getDefinitions().getDefinition().length
-                            * wd2.getDefinitions().getDefinition().length);
+                    dRes += 1.0 / (wd1.getDefinitions().getDefinition().size()
+                            * wd2.getDefinitions().getDefinition().size());
                 }
                 else
                 {
@@ -223,8 +208,8 @@ public class SemanticIndex implements Notifier {
                             }
                         });
                         dRes += isRes.getOverallSimilarity() / 
-                                (wd1.getDefinitions().getDefinition().length *
-                                wd2.getDefinitions().getDefinition().length);
+                                (wd1.getDefinitions().getDefinition().size() *
+                                wd2.getDefinitions().getDefinition().size());
                     }
                     catch (Exception e) {
                         // Do nothing
@@ -258,8 +243,7 @@ public class SemanticIndex implements Notifier {
         
         WordDefinition wd = (WordDefinition)oWd;
         
-        for (int iCnt=0; iCnt < wd.getDefinitions().getDefinition().length; iCnt++) {
-            Definition dDef = wd.getDefinitions().getDefinition()[iCnt];
+        for (Definition dDef: wd.getDefinitions().getDefinition()) {
             sRes += dDef.getWordDefinition()+"\n";
         }
         return sRes;
@@ -313,6 +297,6 @@ public class SemanticIndex implements Notifier {
     }
 
     private final int getDefinitionsSize(WordDefinition wd) {
-        return wd.getDefinitions().getDefinition().length;
+        return wd.getDefinitions().getDefinition().size();
     }
 }

@@ -7,11 +7,8 @@
 
 package gr.demokritos.iit.conceptualIndex;
 
-import gr.demokritos.iit.jinsect.supportUtils.linguistic.ArrayOfDefinition;
-import gr.demokritos.iit.jinsect.supportUtils.linguistic.Definition;
 import gr.demokritos.iit.jinsect.supportUtils.linguistic.DictService;
 import gr.demokritos.iit.jinsect.supportUtils.linguistic.DictServiceSoap;
-import gr.demokritos.iit.jinsect.supportUtils.linguistic.DictService_Impl;
 import gr.demokritos.iit.jinsect.supportUtils.linguistic.WordDefinition;
 
 /** This class is used to retrieve word meanings using the DictService web service than can be
@@ -26,20 +23,10 @@ public class InternetWordNetMeaningExtractor implements IMeaningExtractor {
      *@return The definition of the word looked up.
      */
     public WordDefinition getMeaning(String sString) {
-        try {
-            DictService_Impl dServe = new DictService_Impl();
-            DictServiceSoap dsServe = dServe.getDictServiceSoap();
-            WordDefinition wd = dsServe.defineInDict("wn", sString); // WordNet
-        
-            return wd;
-        }
-        catch(java.rmi.RemoteException ex) {
-       // TODO handle remote exception
-            return null;
-        }
-        catch(javax.xml.rpc.soap.SOAPFaultException sex) {
-       // TODO handle remote exception
-            return null;
-        }
+        DictService dServe = new DictService();
+        DictServiceSoap dsServe = dServe.getDictServiceSoap();
+        WordDefinition wd = dsServe.defineInDict("wn", sString); // WordNet
+
+        return wd;
     }
 }

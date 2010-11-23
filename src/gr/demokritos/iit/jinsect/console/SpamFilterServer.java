@@ -4,7 +4,6 @@
 
 package gr.demokritos.iit.jinsect.console;
 
-import gr.demokritos.iit.jinsect.documentModel.comparators.NGramCachedGraphComparator;
 import gr.demokritos.iit.jinsect.documentModel.comparators.NGramGraphEuclidianComparator;
 import gr.demokritos.iit.jinsect.documentModel.representations.DocumentNGramGraph;
 import gr.demokritos.iit.jinsect.events.NotificationListener;

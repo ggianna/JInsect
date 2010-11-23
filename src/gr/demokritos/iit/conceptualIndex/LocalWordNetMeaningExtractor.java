@@ -10,8 +10,6 @@ package gr.demokritos.iit.conceptualIndex;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
@@ -80,8 +78,11 @@ public class LocalWordNetMeaningExtractor implements IMeaningExtractor {
                     // Add definition line, removing idices and so forth
                     //sDefinition += str.replaceAll("\\d+[.]\\s+[(]\\d+[)]", "");
                     sDefinition = str.replaceAll("\\d+[.]\\s+[(]\\d+[)]", "");
-                    lDefinitions.add(new Definition(sString, new Dictionary(),
-                            sDefinition));
+                    Definition dTmp = new Definition();
+                    dTmp.setWord(sString);
+                    dTmp.setDictionary(new Dictionary());
+                    dTmp.setWordDefinition(sDefinition);
+                    lDefinitions.add(dTmp);
                 }
             }
     
@@ -111,9 +112,7 @@ public class LocalWordNetMeaningExtractor implements IMeaningExtractor {
             System.out.println("Execution failed: " + ioe.getMessage());
             return null; // Failure
         }
-        Definition[] dDef = new Definition[lDefinitions.size()];
-        lDefinitions.toArray(dDef);
-        aodDefs.setDefinition(dDef);
+        aodDefs.getDefinition().addAll(lDefinitions);
         wd.setDefinitions(aodDefs);                        
         
         return wd;
