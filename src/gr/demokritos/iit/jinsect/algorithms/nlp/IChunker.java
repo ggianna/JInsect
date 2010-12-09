@@ -16,5 +16,5 @@ public interface IChunker {
      * @param sToChunk The string to chunk.
      * @return A {@link List} of substrings from the original string.
      */
-    public List chunkString(String sToChunk);
+    public List<String> chunkString(String sToChunk);
 }

@@ -399,8 +399,11 @@ public class Distribution<TKeyType> implements Serializable, IDistributionCompar
     public TKeyType getValueAtPoint(boolean bOnlyValue, double dPopulPoint) {
         // Get the 95 percent threshold otherwise
         TKeyType dRes = null;
-        if (dPopulPoint == 0)
+        if (dPopulPoint == 0.0)
             return asTreeMap().firstKey();
+
+        if (dPopulPoint == 1.0)
+            return asTreeMap().lastKey();
         
         double dNumOfObsvs = observationCount(bOnlyValue);
         double dCnt = 0;

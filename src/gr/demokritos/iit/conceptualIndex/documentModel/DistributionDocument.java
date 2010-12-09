@@ -144,6 +144,16 @@ public class DistributionDocument  implements Serializable {
         }
     }
     
+    /** Creates and saves the graph representation of a string, using substrings of selected size
+     * as source nodes and substrings of size 1 (letters) as destination nodes.
+     *@param sDataString The data string to analyse and represent as a distribution graph.
+     *@param iNGramSize The size of the n-grams used as source nodes.
+     *@param clearCurrentData Indicates whether the new data replace existing data. If this parameter
+     *is set to false, then the new data is appended to existing data.
+     */
+    public void setDataString(String sDataString, boolean clearCurrentData) {
+        setDataString(sDataString, SourceNGramSize, clearCurrentData);
+    }
     /** Creates and saves the graph representation of a string, using substrings of selected size 
      * as source nodes and substrings of size 1 (letters) as destination nodes.
      *@param sDataString The data string to analyse and represent as a distribution graph.

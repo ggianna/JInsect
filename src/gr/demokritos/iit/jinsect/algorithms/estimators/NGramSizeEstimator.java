@@ -183,9 +183,10 @@ public class NGramSizeEstimator {
         for (int iMinRank=MinRank; iMinRank <= MaxRank; iMinRank++) {
             for (int iMaxRank=iMinRank; iMaxRank <= MaxRank; iMaxRank++) {
                 double dEval = getSignalToNoise(iMinRank, iMaxRank);
-                System.err.println(String.format("%d %d %10.8f", iMinRank, iMaxRank, dEval));
                 
                 if (dEval >= dBestEval) {
+                    System.err.println(String.format("New optimal: "
+                            + "%d %d %10.8f", iMinRank, iMaxRank, dEval));
                     if (dEval == dBestEval)
                     {
                         // Prefer shorter intervals
