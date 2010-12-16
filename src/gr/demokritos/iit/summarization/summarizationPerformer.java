@@ -7,6 +7,8 @@
 
 package gr.demokritos.iit.summarization;
 
+import edu.nus.comp.nlp.tool.PlainText;
+import edu.nus.comp.nlp.tool.SentenceSplitter;
 import gr.demokritos.iit.conceptualIndex.structs.Distribution;
 import gr.demokritos.iit.jinsect.console.grammaticalityEstimator;
 import gr.demokritos.iit.jinsect.documentModel.comparators.NGramCachedGraphComparator;
@@ -557,7 +559,7 @@ public class summarizationPerformer {
                         System.err.println("Not an HTML file. Keeping whole.");
                     }
                 }
-                
+
                 // For each sentence
                 double dSentenceScore = 0.0;
                 double dSentenceGrammarScore = 0.0;
