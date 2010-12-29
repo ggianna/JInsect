@@ -72,6 +72,8 @@ public class summarizationPerformer {
                 "-useAverageChunkScore \tIf selected, then the average of the chunks' content score of a sentence is used as the" +
                 "sentence score. Otherwise, the sum of the chunks' content score is considered the sentence score.\n" +
                 "-nogrammar \tIf selected, no grammar is used in the process.\n" +
+                "-ignoreContentInRedundancy \tIf selected, redundancy will not "
+                + "penalize redundant content-related chunks.\n" +
                 "-aquaint \tIf documents in DUC/TAC AQUAINT format.");
     }
     
@@ -92,6 +94,7 @@ public class summarizationPerformer {
         boolean bPenalizeGrammarChunks = false;
         boolean bEliminateNonContent = false;
         boolean bUseAverageChunkScore = false;
+        boolean bIgnoreContentInRedundancy = false;
         boolean bNoGrammar = false;
         boolean bAquaint = false;
         
@@ -113,6 +116,8 @@ public class summarizationPerformer {
                     "eliminateNonContent", Boolean.FALSE.toString()));
             bUseAverageChunkScore = Boolean.valueOf(utils.getSwitch(hSwitches, 
                     "useAverageChunkScore", Boolean.FALSE.toString()));
+            bIgnoreContentInRedundancy = Boolean.valueOf(utils.getSwitch(hSwitches,
+                    "ignoreContentInRedundancy", Boolean.FALSE.toString()));
             bNoGrammar = Boolean.valueOf(utils.getSwitch(hSwitches, "noGrammar", 
                     Boolean.FALSE.toString()));
             bAquaint = Boolean.valueOf(utils.getSwitch(hSwitches, "aquaint",
@@ -687,13 +692,18 @@ public class summarizationPerformer {
         final DocumentNGramGraph argContent = Content;
         final DocumentNGramGraph argGrammar = Grammar;
         final boolean argBNoGrammar = bNoGrammar;
+        final boolean argBIgnoreContent = bIgnoreContentInRedundancy;
         
         // Filter removes grammar and pure content words, leaving differences
         nbsNovelty.SentenceRepresentationFilter = new IObjectFilter<DocumentNGramGraph>() {
             @Override
             public DocumentNGramGraph filter(DocumentNGramGraph obj) {
-                return (argBNoGrammar) ?  obj.allNotIn(argContent) : 
-                    obj.allNotIn(argGrammar).allNotIn(argContent); // Compare non-common part
+                DocumentNGramGraph gRes = obj;
+                if (!argBNoGrammar)
+                    gRes = obj.allNotIn(argGrammar);
+                if (argBIgnoreContent)
+                    gRes = gRes.allNotIn(argContent);
+                return gRes; // Compare non-common part
             }
         };
         

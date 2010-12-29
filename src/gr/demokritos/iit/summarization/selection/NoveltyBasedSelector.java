@@ -306,16 +306,22 @@ public class NoveltyBasedSelector<TSentenceType,TTokenType> implements
             
             // Update sentence ranks, using redundancy
             // Higher redundancy is offered minimum score
-            double dRedundancyRank = 1.0;
             while (!redundancy.asTreeMap().isEmpty()) {
-                dRedundancyRank++;
+                double dRedundancyRank = redundancy.asTreeMap().size();
+
                 // Find next sentence of maximum redundancy
                 TSentenceType s = redundancy.getKeyOfMaxValue();
-                dSentences.increaseValue(s, -dRedundancyRank);
+                dSentences.setValue(s, -dRedundancyRank);
                 // Remove maximum value from set
                 redundancy.asTreeMap().remove(s);
             }
-            
+
+            // DEBUG LINES
+            System.err.println("\n---Novelty detection:\n");
+            for (TSentenceType s: dSentences.asTreeMap().keySet())
+                System.err.println(String.format("%6.4f\t%s",
+                    dSentences.getValue(s), s.toString()));
+            //////////////
                     
             // Get best scoring sentence
             TSentenceType sBest = (TSentenceType)dSentences.getKeyOfMaxValue();
