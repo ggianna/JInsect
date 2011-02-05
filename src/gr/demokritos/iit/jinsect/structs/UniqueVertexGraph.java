@@ -10,6 +10,8 @@
 
 package gr.demokritos.iit.jinsect.structs;
 
+import gr.demokritos.iit.jinsect.storage.INSECTCompressedMemoryDB;
+import gr.demokritos.iit.jinsect.storage.INSECTMemoryDB;
 import gr.demokritos.iit.jinsect.utils;
 import java.io.IOException;
 import java.io.Serializable;
@@ -241,6 +243,14 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
     private void readObject(java.io.ObjectInputStream in)
       throws IOException, ClassNotFoundException {
      UniqueVertices = (HashMap)in.readObject();
+    }
+
+    @Override
+    public Object clone() {
+        INSECTCompressedMemoryDB<UniqueVertexGraph> m = new
+                INSECTCompressedMemoryDB<UniqueVertexGraph>();
+        m.saveObject(this, "tmp", "tmp");
+        return m.loadObject("tmp", "tmp");
     }
 
     public static void main(String[] args) {

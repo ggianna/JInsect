@@ -953,11 +953,15 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
         System.out.println(gr.demokritos.iit.jinsect.utils.graphToDot(ngs.getGraphLevel(0), true));
     }
     
+    @Override
     public Object clone() {
         DocumentNGramGraph gRes = new DocumentNGramGraph(MinSize, MaxSize, CorrelationWindow);
         gRes.DataString = DataString;
         gRes.DegradedEdges.putAll((HashMap)this.DegradedEdges.clone());
-        gRes.NGramGraphArray = this.NGramGraphArray.clone();
+        gRes.NGramGraphArray = new UniqueVertexGraph[this.NGramGraphArray.length];
+        int iCnt=0;
+        for (UniqueVertexGraph uCur : this.NGramGraphArray)
+            gRes.NGramGraphArray[iCnt++] = (UniqueVertexGraph)uCur.clone();
         gRes.Normalizer = this.Normalizer;
         gRes.TextPreprocessor = this.TextPreprocessor;
         gRes.WordEvaluator = this.WordEvaluator;
