@@ -857,16 +857,45 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
         MaxSize = in.readInt();
         CorrelationWindow = in.readInt();
         DataString = (String)in.readObject();
+//        DataString = "";
 
-        // Read all graphs
-        InitGraphs();
+////        // DEBUG LINES
+//        if (utils.Sum == 0) {
+//            UniqueVertexGraph uT = new UniqueVertexGraph();
+//            Runtime.getRuntime().gc();
+//            utils.Sum = Runtime.getRuntime().freeMemory();
+//            System.out.println("Starting free (MB):" +
+//                Runtime.getRuntime().freeMemory() / (1024*1024));
+//        }
+//        //////////////
+        // Create array of graphs
+        NGramGraphArray = new UniqueVertexGraph[MaxSize - MinSize + 1];
         // For each graph
         for (int iCnt=MinSize; iCnt <= MaxSize; iCnt++) {
+            // TODO: Restore
             UniqueVertexGraph g = (UniqueVertexGraph)in.readObject();
+//            in.readObject();
+//            UniqueVertexGraph g = null;
+            
             this.NGramGraphArray[iCnt - MinSize] = g;
+
+////            // DEBUG LINES
+//            if (++utils.Count % 200 == 0) {
+//                System.out.println("So far " + utils.Count);
+//                Runtime.getRuntime().runFinalization();
+//                Runtime.getRuntime().gc();
+//                System.out.println("Current free (MB):" +
+//                    Runtime.getRuntime().freeMemory() / (1024*1024));
+//                System.out.println("Average size (Kb): " + (double)
+//                        (utils.Sum - Runtime.getRuntime().freeMemory())
+//                        / (utils.Count * 1024));
+//            }
+//            //////////////
         }
         // Load degredation
         DegradedEdges = (HashMap)in.readObject();
+//        if (DegradedEdges.size() > 500)
+//            System.out.println(DegradedEdges.size() + " degraded");
     } catch (Exception e) {
         throw new IOException(e.getMessage());
     }

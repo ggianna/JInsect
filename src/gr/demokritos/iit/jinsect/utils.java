@@ -48,6 +48,9 @@ import salvo.jesus.graph.WeightedEdge;
  * @author ggianna
  */
 public final class utils {
+    public static long Count = 0;
+    public static long Sum = 0;
+    
     /** Math.max reimplemented.
      */
     public final static double max(double Num1, double Num2)

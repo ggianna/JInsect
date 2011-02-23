@@ -102,6 +102,7 @@ public class INSECTFileDB<TObjectType extends Serializable> extends INSECTDB
 
         try {
             fsIn.close();
+            gzIn.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }

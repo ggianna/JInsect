@@ -11,14 +11,12 @@
 package gr.demokritos.iit.jinsect.structs;
 
 import gr.demokritos.iit.jinsect.storage.INSECTCompressedMemoryDB;
-import gr.demokritos.iit.jinsect.storage.INSECTMemoryDB;
 import gr.demokritos.iit.jinsect.utils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import salvo.jesus.graph.DirectedEdge;
 import salvo.jesus.graph.Edge;
 import salvo.jesus.graph.Vertex;
 import salvo.jesus.graph.VertexImpl;
@@ -51,7 +49,7 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
     /** Initializes the graph.
      */
     public UniqueVertexGraph() {
-        UniqueVertices = new HashMap();
+        UniqueVertices = new HashMap<String, Vertex>();
         // DuplicateChecker d = new DuplicateChecker(this);
         // this.addListener(d);
     }
@@ -250,7 +248,10 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
         INSECTCompressedMemoryDB<UniqueVertexGraph> m = new
                 INSECTCompressedMemoryDB<UniqueVertexGraph>();
         m.saveObject(this, "tmp", "tmp");
-        return m.loadObject("tmp", "tmp");
+        Object res = m.loadObject("tmp", "tmp");
+        // Clear reference
+        m.deleteObject("tmp", "tmp");
+        return res;
     }
 
     public static void main(String[] args) {
