@@ -15,13 +15,22 @@ import java.util.HashMap;
 public class DocumentNGramHGraph extends DocumentNGramGraph {
 
     protected int Segments = 4;
+
+    public DocumentNGramHGraph(int iMinSize, int iMaxSize, int iDist, int iSegments) {
+        Segments = iSegments;
+        MinSize = iMinSize;
+        MaxSize = iMaxSize;
+        CorrelationWindow = iDist;
+    }
+
+
     public DocumentNGramHGraph(int iSegments) {
         Segments = iSegments;
         InitHGraphs();
     }
 
 
-    protected void InitHGraphs() {
+    private void InitHGraphs() {
         // Create array of graphs
         NGramGraphArray = new UniqueVertexHugeGraph[MaxSize - MinSize + 1];
         // Init array
@@ -29,7 +38,6 @@ public class DocumentNGramHGraph extends DocumentNGramGraph {
             NGramGraphArray[iCnt - MinSize] = new UniqueVertexHugeGraph(Segments);
         // Create degraded edge list
         DegradedEdges = new HashMap();
-
     }
 
 }
