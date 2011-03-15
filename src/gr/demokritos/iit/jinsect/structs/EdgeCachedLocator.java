@@ -80,7 +80,7 @@ public class EdgeCachedLocator implements Serializable {
                 lMisses++;
                 lEdges = getOutgoingEdgesUncached(gGraph, vHead);
                 // TODO: REMOVE
-                lEdges = getOutgoingEdgesUncached(gGraph, vHead);
+                // lEdges = getOutgoingEdgesUncached(gGraph, vHead);
                 ///////////////
                 // Check if time has reached max value
                 if (TimeCnt == Long.MAX_VALUE) {
@@ -99,8 +99,10 @@ public class EdgeCachedLocator implements Serializable {
                 Cache.put(vHead.getLabel(), hOutVertices);
                 ElementAccessTime.put(vHead.getLabel(), ++TimeCnt);
             }
-            else
+            else {
                 lHits++;
+                ElementAccessTime.put(vHead.getLabel(), ++TimeCnt);
+            }
             
             // Update Access time
             CacheAccess.put(TimeCnt, vHead.getLabel());

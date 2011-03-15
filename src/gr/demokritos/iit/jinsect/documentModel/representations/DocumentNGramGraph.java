@@ -567,7 +567,12 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                     {
                         List l = new ArrayList();
                         l.add(sTail);
-                        createWeightedEdgesConnecting(gNewGraph, sHead, l,1, eEdge.getWeight(), 1.0);
+                        double dTargetWeight = 0.5 * (eEdge.getWeight() + weCurItem.getWeight());
+
+                        // Initialize with mean weight
+                        createWeightedEdgesConnecting(gNewGraph, sHead, l, dTargetWeight, dTargetWeight, 1.0);
+                        // Used to be
+                        //createWeightedEdgesConnecting(gNewGraph, sHead, l,1, eEdge.getWeight(), 1.0);
                     }
                     catch (Exception e)
                     {
