@@ -29,12 +29,14 @@ public class DocumentWordGraph extends DocumentNGramGraph {
         MinSize = 1;
         MaxSize = 2;
         CorrelationWindow = 3;
+        InitGraphs();
     }
     
     public DocumentWordGraph(int iMinSize, int iMaxSize, int iCorrelationWindow) {
         MinSize = iMinSize;
         MaxSize = iMaxSize;
         CorrelationWindow = iCorrelationWindow;
+        InitGraphs();
     }
     
     public void createGraphs() {
