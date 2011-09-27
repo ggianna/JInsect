@@ -1,8 +1,6 @@
 /*
- * test.java
- *
- * Created on May 4, 2007, 2:40 PM
- *
+ * Under LGPL
+ * by George Giannakopoulos
  */
 
 package gr.demokritos.iit.jinsect.console;
@@ -18,8 +16,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Utility class for testing purposes only. */
-public class TAC2010SummaryEvaluator {
+
+/**
+ *
+ * @author ggianna
+ */
+public class MultiLing2011SummaryEvaluator {
     public static void main(String[] args) {
         Hashtable<String,String> hSwitches = utils.parseCommandLineSwitches(args);
         String sPeersDir = utils.getSwitch(hSwitches, "peersDir", "peers/");
@@ -32,7 +34,7 @@ public class TAC2010SummaryEvaluator {
                 String.valueOf(Boolean.FALSE))).booleanValue();
 
         IStatusDisplayer sdOut = new StreamOutputConsole(System.err, true);
-        
+
         // Load document set
         DocumentSet dsPeers = new DocumentSet(sPeersDir, 1.0);
         dsPeers.createSets();
@@ -43,7 +45,7 @@ public class TAC2010SummaryEvaluator {
         int iCurFile = 0;
         Date dStart = new Date();
         ThreadList tl = new ThreadList();
-        
+
         sdOut.setStatus(String.format("Starting... %s ", dStart.toString()), 0.0);
         // For each category
         for (String sCategory : (List<String>)dsPeers.getCategories()) {
@@ -64,12 +66,12 @@ public class TAC2010SummaryEvaluator {
                 // Ignore model files, if requested
                 if (bNoModels && isModel(sCurFile))
                     continue;
-                
+
                 // Create command line string
                 final ArrayList<String> sArgs = new ArrayList<String>();
                 sArgs.add("-summary="+sCurFile); // Summary file
                 sArgs.add("-s"); // Silent
-                sArgs.add("-prepend=" + (bNoModels ? "NoModels\t" : 
+                sArgs.add("-prepend=" + (bNoModels ? "NoModels\t" :
                     "AllPeers\t")); // Add per line
                 if (bMerge) {
                     sArgs.add("-merge");
@@ -102,7 +104,7 @@ public class TAC2010SummaryEvaluator {
                     }
                 }))
                     Thread.yield();
-                
+
                 if (iCurFile % 25 == 0) {
                     double dRemaining = (double)(iAllFiles - iCurFile);
                     double dPerFile = (double)(new Date().getTime() - dStart.getTime())
@@ -126,10 +128,7 @@ public class TAC2010SummaryEvaluator {
     }
 
     protected static boolean isModel(String sFile) {
-        return sFile.matches(".+[.][A-Z]");
+        return sFile.matches(".+[.][A-Z][.]250");
     }
 
-    private static boolean isPeer(String sFile) {
-        return !isModel(sFile);
-    }
 }
