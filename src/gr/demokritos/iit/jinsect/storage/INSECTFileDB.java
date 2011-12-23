@@ -66,7 +66,8 @@ public class INSECTFileDB<TObjectType extends Serializable> extends INSECTDB
             GZIPOutputStream gzout = new GZIPOutputStream(fsOut);
 
             ObjectOutputStream oOut = new ObjectOutputStream(gzout);            
-            oOut.writeObject(oObj);            
+            oOut.writeObject(oObj);
+            oOut.close();
             // Complete the GZIP file
             gzout.finish();
             fsOut.close();
