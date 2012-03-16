@@ -8,7 +8,6 @@
 package gr.demokritos.iit.summarization;
 
 import edu.nus.comp.nlp.tool.PlainText;
-import edu.nus.comp.nlp.tool.SentenceSplitter;
 import gr.demokritos.iit.conceptualIndex.structs.Distribution;
 import gr.demokritos.iit.jinsect.console.grammaticalityEstimator;
 import gr.demokritos.iit.jinsect.documentModel.comparators.NGramCachedGraphComparator;
@@ -21,7 +20,7 @@ import gr.demokritos.iit.jinsect.structs.CategorizedFileEntry;
 import gr.demokritos.iit.jinsect.structs.DocumentSet;
 import gr.demokritos.iit.jinsect.utils;
 import gr.demokritos.iit.summarization.analysis.EntropyChunker;
-import gr.demokritos.iit.summarization.selection.NoveltyBasedSelector;
+import gr.demokritos.iit.summarization.selection.CombinedNoveltyBasedSelector;
 import gr.demokritos.iit.tacTools.ACQUAINT2DocumentSet;
 import java.io.File;
 import java.io.FileFilter;
@@ -550,7 +549,8 @@ public class summarizationPerformer {
             while (iFile.hasNext()) {
                 String sCurFile = iFile.next();
                 System.err.println("Extracting and assigning importance to sentences from " + sCurFile + "...");
-                String sText = utils.loadFileToStringWithNewlines(sCurFile).replaceAll("\n", " ");
+                String sText = utils.loadFileToStringWithNewlines(sCurFile);
+                //String sText = utils.loadFileToStringWithNewlines(sCurFile).replaceAll("\n", " ");
                 // Extract TEXT ONLY
                 if (bAquaint) {
                     sText = sText.substring(sText.indexOf(ACQUAINT2DocumentSet.TEXT_TAG) + ACQUAINT2DocumentSet.TEXT_TAG.length() + 1);
@@ -571,7 +571,15 @@ public class summarizationPerformer {
                 // TODO: Implement good chunking
                 // HIGH Granularity chunking with: "([.,;-]+:*[ ]+)|(<P>)|(</P>)"
                 // LOW Granularity chunking with "[.]|(<P>)|(</P>)"
-                for (String sSentence : Arrays.asList(sText.split("([.,;-]+:*[ ]+)|(<P>)|(</P>)"))) {
+
+
+                // Using smart sentence splitter
+                // TODO: Split normally, or PROVIDE SPLIT: 1 SENTENCE PER LINE
+                String[] sCandSentences = sText.split("\n+");
+                
+
+                for (String sSentence : Arrays.asList(sCandSentences)) {
+//                for (String sSentence : Arrays.asList(sText.split("([.,;-]+:*[ ]+)|(<P>)|(</P>)"))) {
                     dSentenceScore = 1.0;
                     if (bChunkScoring) {
                         List<String> lSentenceChunks = ec.chunkString(sSentence);
@@ -664,7 +672,10 @@ public class summarizationPerformer {
 
         
         // Select sentences based on novelty
-        NoveltyBasedSelector<String,String> nbsNovelty = new NoveltyBasedSelector<String,String>();
+        //NoveltyBasedSelector<String,String> nbsNovelty = new NoveltyBasedSelector<String,String>();
+        // USE original importance ranking
+        CombinedNoveltyBasedSelector<String,String> nbsNovelty = new CombinedNoveltyBasedSelector<String,String>();
+
         // Use max sentences setting
         nbsNovelty.MaxSentencesSelected = iMaxSentencesSelected;
 //        // Use custom comparator to take length ratio into account
