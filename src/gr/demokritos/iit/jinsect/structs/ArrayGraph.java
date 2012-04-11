@@ -7,9 +7,11 @@ package gr.demokritos.iit.jinsect.structs;
 
 import gr.demokritos.iit.jinsect.documentModel.representations.DocumentNGramGraph;
 import gr.demokritos.iit.jinsect.documentModel.representations.DocumentNGramSymWinGraph;
-import gr.demokritos.iit.jinsect.threading.ThreadQueue;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author pckid
@@ -39,7 +41,10 @@ public class ArrayGraph {
         gRes.setLocator(eclLocator);
 
         // queue for threads in order to be executed
-        ThreadQueue tqThreads = new ThreadQueue();
+        ExecutorService tqThreads = Executors.newCachedThreadPool();
+        
+        // OBSOLETE
+        //ThreadQueue tqThreads = new ThreadQueue();
 
         final DocumentNGramGraph gResArg = gRes;
         final int[][] ImageSegmentedArray = ImageArray;
@@ -51,7 +56,8 @@ public class ArrayGraph {
 
             // Runnable is an interface only to run
             // that's why (interface)
-            while (!tqThreads.addThreadFor(new Runnable() {
+//            while (!
+            tqThreads.submit(new Runnable() {
                 @Override
                 public void run() {
                     for (int iYCnt = 0; iYCnt < iHeightArg; iYCnt++) {
@@ -102,15 +108,17 @@ public class ArrayGraph {
                         /////////////
                     }
                 }
-            }))
-                // be patient (for the basic thread)
-                Thread.yield();
+            });
+//                    )
+//                // be patient (for the basic thread)
+//                Thread.yield();
 
         }
 
         try {
             // maybe there are threads that have not finished, so wait for them
-            tqThreads.waitUntilCompletion();
+            tqThreads.shutdown();
+            tqThreads.awaitTermination(1000, TimeUnit.DAYS);
         }
         catch (InterruptedException ie) {
             // Ignore
