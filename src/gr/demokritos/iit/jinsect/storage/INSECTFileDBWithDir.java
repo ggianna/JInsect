@@ -2,14 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package gr.demokritos.iit.LTagging.storage;
+package gr.demokritos.iit.jinsect.storage;
 
-import gr.demokritos.iit.jinsect.documentModel.representations.DocumentNGramSymWinGraph;
-import gr.demokritos.iit.jinsect.storage.INSECTFileDB;
 import java.io.Serializable;
-import java.lang.String;
 import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
 
 /**
  *
@@ -18,13 +14,13 @@ import java.util.concurrent.Semaphore;
  * Contains the override methods of INSECTFileDB
  * 
  */
-public class INSECTDBWithDir extends INSECTFileDB{
+public class INSECTFileDBWithDir extends INSECTFileDB{
 
-    public INSECTDBWithDir(String sPrefix, String sBaseDir) {
+    public INSECTFileDBWithDir(String sPrefix, String sBaseDir) {
         super(sPrefix, sBaseDir);
     }
 
-    public INSECTDBWithDir() {
+    public INSECTFileDBWithDir() {
         super();
     }
     

@@ -769,7 +769,7 @@ public class summarizationPerformer {
         // Output summary
         System.out.println(String.format("SUMMARY using %d sentences:", alSummarySentences.size()));
         // Remove double fullstops
-        System.out.println(utils.printIterable(alSummarySentences, ".\n").replaceAll("[.]{2}[^.]", "."));
+        System.out.println(utils.printIterable(alSummarySentences, ".\n").replaceAll("[.]{2}", "."));
     }
     
 }

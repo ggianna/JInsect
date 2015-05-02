@@ -489,8 +489,9 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 double dWeight = weCurItem.getWeight();
                 lOtherNodes.clear();
                 lOtherNodes.add(sTail);
+                // TODO: Check this
                 createWeightedEdgesConnecting(gGraph, sHead,
-                 lOtherNodes, 1.0, dWeight, fWeightPercent);
+                 lOtherNodes, dWeight, dWeight, fWeightPercent);
             }
 
             // DONE: Remove multi-threading

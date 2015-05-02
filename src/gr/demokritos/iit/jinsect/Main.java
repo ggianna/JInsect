@@ -7,13 +7,8 @@
 
 package gr.demokritos.iit.jinsect;
 
-import gr.demokritos.iit.jinsect.gui.MainINSECTForm;
 import gr.demokritos.iit.jinsect.gui.NGramCorrelationForm;
 
-import java.awt.Frame;
-import java.awt.GridBagLayout;
-import java.awt.event.WindowAdapter;
-import gr.demokritos.iit.jinsect.structs.Dictionary;
 
 /**
  *

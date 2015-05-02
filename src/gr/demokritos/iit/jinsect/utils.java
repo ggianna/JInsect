@@ -401,7 +401,9 @@ public final class utils {
      */
     public static final String[] splitToWords(String sStr, boolean bStem) {
         PorterStemmer sStem = new PorterStemmer();
-        String [] sRes = sStr.toLowerCase().split("(\\s|\\p{Punct})+");
+        // Removed conversion to lowercase
+//        String [] sRes = sStr.toLowerCase().split("(\\s|\\p{Punct})+");
+        String [] sRes = sStr.split("(\\s|\\p{Punct})+");
         if (bStem)
             for (int iCnt=0; iCnt < sRes.length; iCnt++)
                 if (!sRes[iCnt].trim().equals(""))

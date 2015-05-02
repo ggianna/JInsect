@@ -24,13 +24,13 @@ import java.util.ArrayList;
  */
 public class NGramSymWinHierDocument implements ILoadableTextPrint {
 
-    int MinN;
-    int Levels;
-    double DistFactor;
-    String DataString;
-    ArrayList<int[][]> LevelArrays;
-    ArrayList<DocumentNGramGraph> LevelGraphs;
-    ArrayList<GraphIndex> GraphIndices;
+    protected int MinN;
+    protected int Levels;
+    protected double DistFactor;
+    protected String DataString;
+    protected ArrayList<int[][]> LevelArrays;
+    protected ArrayList<DocumentNGramGraph> LevelGraphs;
+    protected ArrayList<GraphIndex> GraphIndices;
 
     public NGramSymWinHierDocument(int iMinN, int iLevels, double dDistFactor,
                 ArrayList<GraphIndex> giGraphIndices) {
@@ -79,13 +79,20 @@ public class NGramSymWinHierDocument implements ILoadableTextPrint {
             int[] iaNew = new int[iaaPrv[0].length / MinN];
             // For every step
             for (int iCurPos=0, iNewPos = 0; iCurPos < iaaPrv[0].length; iCurPos += MinN) {
-                if (iCurPos + MinN > iaaPrv[0].length)
+                // The size is based on the level and distance factor
+                int iSNeighborhoodSize = (int)(DistFactor * iLvl);
+                
+                if (iCurPos + iSNeighborhoodSize > iaaPrv[0].length)
                     break;
                 
                 int[][] iaaCur = new int[1][];
-                int[] iaCur = new int[MinN + 1];
+                int[] iaCur = new int[iSNeighborhoodSize];
+                
+                // TODO: IMPROVE BEHAVIOUR FOR MinN > 1
+                // It does not break down the neighbours to MinN-grams...
+                
                 // Copy sub-matrix
-                System.arraycopy(iaaPrv[0], iCurPos, iaCur, 0, MinN);
+                System.arraycopy(iaaPrv[0], iCurPos, iaCur, 0, iSNeighborhoodSize);
                 // Assign row to single-row matrix
                 iaaCur[0] = iaCur;
                 // Create graph
