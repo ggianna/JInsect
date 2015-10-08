@@ -245,12 +245,6 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
 
     @Override
     public Object clone() {
-//        INSECTCompressedMemoryDB<UniqueVertexGraph> m = new
-//                INSECTCompressedMemoryDB<UniqueVertexGraph>();
-//        m.saveObject(this, "tmp", "tmp");
-//        Object res = m.loadObject("tmp", "tmp");
-//        // Clear reference
-//        m.deleteObject("tmp", "tmp");
         UniqueVertexGraph res = new UniqueVertexGraph();
         res.UniqueVertices = (HashMap<String, Vertex>) this.UniqueVertices.clone();
         
@@ -279,76 +273,3 @@ public class UniqueVertexGraph extends WeightedGraphImpl implements Serializable
         }        
     }
 }
-
-/** DEPRECATED
-class DuplicateChecker implements GraphListener {
-    // The graph to check
-    UniqueVertexGraph GraphToListen;
-    public DuplicateChecker(UniqueVertexGraph g) {
-        GraphToListen = g;
-    }
-    
-    public void beforeVertexAdded(GraphAddVertexEvent event) throws Exception {
-        if (GraphToListen.contains(event.getVertex())) {
-            // DEBUG LINES
-            //System.err.println("Will not add vertex " + 
-                    //event.getVertex().getLabel());
-            //////////////
-            throw new Exception("Vertex already exists.");
-        }
-    }
-
-    public void afterVertexAdded(GraphAddVertexEvent event) {
-        GraphToListen.UniqueVertices.put(event.getVertex().getLabel(),
-                event.getVertex());
-    }
-
-    public void beforeVertexRemoved(GraphRemoveVertexEvent event) throws Exception {
-    }
-
-    public void afterVertexRemoved(GraphRemoveVertexEvent event) {
-        GraphToListen.UniqueVertices.remove(event.getVertex().getLabel());
-    }
-
-    public void beforeEdgeAdded(GraphAddEdgeEvent event) throws Exception {
-        Vertex vH, vT;
-        boolean bVertexMissed = false;
-        Vertex vHead = event.getEdge().getVertexA();
-        Vertex vTail = event.getEdge().getVertexB();
-        
-        if ((vH = GraphToListen.locateVertex(vHead)) == null) {
-            GraphToListen.add(vH = vHead);
-            bVertexMissed = true;
-        }
-        
-        if ((vT = GraphToListen.locateVertex(vTail)) == null) {
-            GraphToListen.add(vT = vTail);
-            bVertexMissed = true;
-        }
-        
-        Edge e = null;
-        // Locate only if both vertices have been found
-        if (!bVertexMissed)
-            e = utils.locateDirectedEdgeInGraph(
-                    GraphToListen, vH, vT);
-        if (e != null) {
-            // DEBUG LINES
-            System.err.println("Will not add edge " + 
-                    event.getEdge().toString());
-            //////////////
-            throw new Exception("Edge already exists.");
-        }
-        
-    }
-
-    public void afterEdgeAdded(GraphAddEdgeEvent event) {
-    }
-
-    public void beforeEdgeRemoved(GraphRemoveEdgeEvent event) throws Exception {
-    }
-
-    public void afterEdgeRemoved(GraphRemoveEdgeEvent event) {
-    }
-    
-}
- */
