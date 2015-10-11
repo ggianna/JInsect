@@ -6,6 +6,7 @@
  */
 
 package gr.demokritos.iit.jinsect.documentModel.representations;
+
 import gr.demokritos.iit.jinsect.structs.IMergeable;
 import java.io.IOException;
 import java.io.Serializable;
@@ -445,10 +446,6 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 PrecedingNeighbours.add(sCurNGram);
                 if (PrecedingNeighbours.size() > CorrelationWindow)
                     PrecedingNeighbours.removeElementAt(0);// Remove first element
-            }
-            int iNeighboursLen = PrecedingNeighbours.size();
-            if ((iNeighboursLen < CorrelationWindow) && (iNeighboursLen > 0)) {
-                createEdgesConnecting(gGraph, sCurNGram, (List)PrecedingNeighbours, hTokenAppearence);
             }
         }        
     }
