@@ -114,8 +114,40 @@ public final class utils {
      *@return The edge, if found, otherwise null.
      */
     public static final Edge locateEdgeInGraph(UniqueVertexGraph gGraph, Vertex vHead, Vertex vTail) {
-    	
-		Edge eRes = locateDirectedEdgeInGraph(gGraph, vHead, vTail);
+        /*
+        try {
+            vHead = locateVertexInGraph(gGraph, vHead);
+            if (vHead == null)
+                return null;
+            vTail = locateVertexInGraph(gGraph, vTail);
+            if (vTail == null)
+                return null;
+            
+            List lEdges =  gGraph.getEdges(vHead);
+            java.util.Iterator iIter = lEdges.iterator();
+            String sTailLbl = vTail.getLabel();
+            while (iIter.hasNext())
+            {
+                Edge eCurrent = (Edge)iIter.next();
+                if (vHead != vTail) {
+                    if ((eCurrent.getVertexA().getLabel().compareTo(sTailLbl) == 0) || 
+                            (eCurrent.getVertexB().getLabel().compareTo(sTailLbl) == 0))
+                        return eCurrent; // Found. Return edge.
+                }
+                else 
+                {
+                    if ((eCurrent.getVertexA().getLabel().equals(sTailLbl)) && 
+                            (eCurrent.getVertexB().getLabel().equals(sTailLbl)))
+                        return eCurrent; // Found. Return edge.
+                }
+            }
+            return null;    // Not found
+        }
+        catch (NullPointerException e) {
+            return null;
+        }
+        */
+        Edge eRes = locateDirectedEdgeInGraph(gGraph, vHead, vTail);
         return eRes == null ? locateDirectedEdgeInGraph(gGraph, vTail, vHead) : eRes;
     }
 
@@ -658,6 +690,82 @@ public final class utils {
         return dNum == 0.0 ? dNum : dNum / Math.abs(dNum);
 
     }
+    
+    /*
+    public static List getFlattenedList(Object oNestedLists) {
+        if (oNestedLists instanceof Union)
+            return getFlattenedUnion(oNestedLists, new ArrayList());
+        if (oNestedLists instanceof Concatenation)
+            return getFlattenedConcatenation(oNestedLists, new ArrayList());
+        
+        ArrayList alTemp = new ArrayList();        
+        alTemp.add(oNestedLists);
+        
+        return alTemp;
+    }
+    
+    private static final List getFlattenedUnion(Object oNestedLists, List lFlatList) {
+        List lFirstList = new ArrayList();
+        List lSecondList;
+        
+        if (oNestedLists instanceof Union) {
+            // Get list
+            List lNestedLists = (List)oNestedLists;
+            Iterator iCurObj = lNestedLists.iterator();
+            
+            // For every object
+            while (iCurObj.hasNext()) {
+                Object oCur = iCurObj.next();
+                // If it is a list
+                if (oCur instanceof Concatenation)
+                    lFirstList.addAll(getFlattenedConcatenation(oCur, lFlatList));
+                else
+                    if (oCur instanceof Union)
+                        lFirstList.addAll(getFlattenedUnion(oCur, lFlatList));
+                    else
+                        lFirstList.add(oCur);
+            }
+        }
+        else // otherwise
+        {
+            // If not a list
+            lFirstList.add(oNestedLists); // Just add to flat list
+        }
+        
+        lSecondList = lFlatList;
+        lFlatList = getPermutations(lFirstList, lSecondList);
+        
+        return lFlatList;
+    }
+    
+    private static final List getFlattenedConcatenation(Object oNestedLists, List lFlatList) {
+        if (oNestedLists instanceof Concatenation) {
+            // Get list
+            List lNestedLists = (List)oNestedLists;
+            Iterator iCurObj = lNestedLists.iterator();
+            
+            // For every object
+            while (iCurObj.hasNext()) {
+                Object oCur = iCurObj.next();
+                // If it is a list
+                if (oCur instanceof Concatenation)
+                    getFlattenedConcatenation(oCur, lFlatList);
+                else
+                    if (oCur instanceof Union)
+                        getFlattenedUnion(oCur, lFlatList);
+                    else
+                        lFlatList.add(oCur);
+            }
+        }
+        else // otherwise
+        {
+            // If not a list
+            lFlatList.add(oNestedLists); // Just add to flat list
+        }
+        
+        return lFlatList;
+    }
+    */
     
     /** Calculates the product of two lists.
      *@param oA The first list.

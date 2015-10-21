@@ -6,7 +6,6 @@
  */
 
 package gr.demokritos.iit.jinsect.documentModel.representations;
-
 import gr.demokritos.iit.jinsect.structs.IMergeable;
 import java.io.IOException;
 import java.io.Serializable;
@@ -447,6 +446,10 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 if (PrecedingNeighbours.size() > CorrelationWindow)
                     PrecedingNeighbours.removeElementAt(0);// Remove first element
             }
+            int iNeighboursLen = PrecedingNeighbours.size();
+            if ((iNeighboursLen < CorrelationWindow) && (iNeighboursLen > 0)) {
+                createEdgesConnecting(gGraph, sCurNGram, (List)PrecedingNeighbours, hTokenAppearence);
+            }
         }        
     }
     
@@ -490,6 +493,42 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 createWeightedEdgesConnecting(gGraph, sHead,
                  lOtherNodes, dWeight, dWeight, fWeightPercent);
             }
+
+            // DONE: Remove multi-threading
+//            // Multi-threading
+//            ThreadQueue tq = new ThreadQueue();
+//            // For every edge on other graph
+//            java.util.Iterator iIter = gOtherGraph.getEdgeSet().iterator();
+//            while (iIter.hasNext())
+//            {
+//                WeightedEdge weCurItem = (WeightedEdge)iIter.next();
+//                final String sHead = weCurItem.getVertexA().getLabel();
+//                final String sTail = weCurItem.getVertexB().getLabel();
+//                final double dWeight = weCurItem.getWeight();
+//                final String[] lOtherNodes = new String[1];
+//                lOtherNodes[0] = sTail;
+//                final UniqueVertexGraph graphArg = gGraph;
+//                final double dWeightPercentArg = fWeightPercent;
+//
+//                while (!tq.addThreadFor(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        synchronized (graphArg) {
+//                            createWeightedEdgesConnecting(graphArg, sHead,
+//                             java.util.Arrays.asList(lOtherNodes), 1.0, dWeight,
+//                             dWeightPercentArg);
+//                        }
+//                    }
+//                }))
+//                    Thread.yield();
+//            }
+//
+//            try {
+//                tq.waitUntilCompletion();
+//            }
+//            catch (InterruptedException ie) {
+//                // Do nothing
+//            }
         }
     }
     
