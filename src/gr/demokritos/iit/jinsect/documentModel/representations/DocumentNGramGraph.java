@@ -446,10 +446,6 @@ public class DocumentNGramGraph implements Serializable, Cloneable, IMergeable<D
                 if (PrecedingNeighbours.size() > CorrelationWindow)
                     PrecedingNeighbours.removeElementAt(0);// Remove first element
             }
-            int iNeighboursLen = PrecedingNeighbours.size();
-            if ((iNeighboursLen < CorrelationWindow) && (iNeighboursLen > 0)) {
-                createEdgesConnecting(gGraph, sCurNGram, (List)PrecedingNeighbours, hTokenAppearence);
-            }
         }        
     }
     
