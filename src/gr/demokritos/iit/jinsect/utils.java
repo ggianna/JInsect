@@ -403,7 +403,7 @@ public final class utils {
         PorterStemmer sStem = new PorterStemmer();
         // Removed conversion to lowercase
 //        String [] sRes = sStr.toLowerCase().split("(\\s|\\p{Punct})+");
-        String [] sRes = sStr.split("(\\s|\\p{Punct})+");
+        String [] sRes = sStr.split("(\\s+|\\p{Punct}+)+");
         if (bStem)
             for (int iCnt=0; iCnt < sRes.length; iCnt++)
                 if (!sRes[iCnt].trim().equals(""))
